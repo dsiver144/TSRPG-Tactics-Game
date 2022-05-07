@@ -1,0 +1,9 @@
+class TacticleUnit {
+    constructor() {
+        
+    }
+
+    update() {
+
+    }
+}

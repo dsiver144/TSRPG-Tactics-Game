@@ -8,11 +8,16 @@
 * @help 
 * Empty Help
 * 
-* @param testParam:number
+* @param testParam2:number
 * @text Test Param
 * @type number
 * @default 144
 * @desc A Test Param
+*
+* @command startBattle
+* @text Start TBS Battle
+* @desc Start a tbs battle on current map.
+*
 * 
 */
 /*~struct~PositionObject:
@@ -48,77 +53,204 @@
  * @desc Choose the pan value of the se
  * 
  */
+window.TBS = window.TBS || {};
+
 (function() {
 
-    var params = PluginManager.parameters('DSI-TacticalBattleSystem');
+    const pluginName = 'DSI-TacticalBattleSystem';
+    let params = PluginManager.parameters(pluginName);
     params = PluginManager.processParameters(params);
 
-    function GameUtils() {
-        return new Error("Can't init static class");
-    }
+    TBS.params = TBS.params || {};
+    TBS.params = {...TBS.params, params};
+    
+    PluginManager.registerCommand(pluginName, "startBattle", args => {
+        const startPos = GameUtils.getAllyPositionEvents();
+        const enemyEvents = GameUtils.getEnemyEvents();
+        console.log({startPos, enemyEvents});
+        TacticalBattleSystem.inst().reset();
+        TacticalBattleSystem.inst().setup(startPos, enemyEvents);
+        // GameUtils.setPlayerMapScroll(false);
+        GameUtils.setCameraTarget(TacticalBattleSystem.inst().cursor);
+    });
 
-    GameUtils.floodFillOffsets = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    GameUtils.floodFill = function(x, y, range, conditionFunction) {
-        const result = [];
-        const visitedTiles = {};
-        visitedTiles[`${x}-${y}`] = true;
-        // Recursive function to fill the array.
-        function doFill(targetX, targetY, range) {
-            const nextTiles = [];
-            GameUtils.floodFillOffsets.forEach(([offsetX, offsetY]) => {
-                const checkX = targetX + offsetX;
-                const checkY = targetY + offsetY;
-                if (!visitedTiles[`${checkX}-${checkY}`]) {
-                    if (conditionFunction(checkX, checkY)) {
-                        const tile = {
-                            x: checkX,
-                            y: checkY,
-                            value: range
-                        }
-                        nextTiles.push([checkX, checkY]);
-                        result.push(tile);
-                    }
-                    visitedTiles[`${checkX}-${checkY}`] = true;
-                }
-            })
-            if (range <= 0) return;
-            nextTiles.forEach(([nextX, nextY]) => {
-                doFill(nextX, nextY, range - 1);
-            })  
+    class TacticalBattleSystem {
+
+        constructor() {
+            this.currentPhase = 'none';
+            /**
+             * @type {TacticleUnit[]}
+             */
+            this.allyUnits = [];
+            /**
+             * @type {TacticleUnit[]}
+             */
+            this.enemyUnits = [];
+            this.activeTeamId = 0;
+            /**
+             * @type {TacticleCursor}
+             */
+            this.cursor = new TacticleCursor();
         }
-
-        doFill(x, y, range - 1);
-
-        return result;
+        /**
+         * Setup battle
+         * @param {Game_Event[]} allyStartPositions 
+         * @param {Game_Event[]} enemyEvents 
+         */
+        setup(allyStartPositions, enemyEvents) {
+            this.allyStartPositions = allyStartPositions;
+            this.enemyEvents = enemyEvents;
+            this.currentPhase = 'init';
+            this.cursor.activate();
+        }
+        /**
+         * Reset Battle System
+         */
+        reset() {
+            this.currentPhase = 'none';
+            this.allyUnits = [];
+            this.enemyUnits = [];
+        }
+        /**
+         * Update every frame
+         */
+        update() {
+            if (this.currentPhase === 'none') return;
+            this.updatePhase();
+            this.updateUnits();
+            this.updateCursor();
+        }
+        /**
+         * Update battle phase
+         */
+        updatePhase() {
+            switch(this.currentPhase) {
+            case 'setup':
+                
+            case 'init':
+                this.initUnits();
+                break;
+            case 'battleStart':
+                this.battleStart();
+                break;
+            case 'playerTurn':
+                this.playerTurn();
+                break;
+            case 'enemyTurn':
+                this.enemyTurn();
+                break;
+            case 'updateTurn':
+                this.activeTeamId == 0 ? this.updatePlayerTurn() : this.updateEnemyTurn();
+                break;
+            }
+        }
+        /**
+         * Update Units for both side
+         */
+        updateUnits() {
+            this.allyUnits.forEach(unit => unit.update());
+            this.enemyUnits.forEach(unit => unit.update());
+        }
+        /**
+         * Update cursor
+         */
+        updateCursor() {
+            this.cursor.update();
+        }
+        /**
+         * Init units for both side
+         */
+        initUnits() {
+            this.currentPhase = 'battleStart';
+        }
+        /**
+         * Battle Start
+         */
+        battleStart() {
+            this.setActiveTeam(0);
+        }
+        /**
+         * Set Active Team
+         * @param {number} teamId 
+         */
+        setActiveTeam(teamId) {
+            this.activeTeamId = teamId;
+            this.determineTurn();
+        }
+        /**
+         * Choose next turn base on current active team id
+         */
+        determineTurn() {
+            if (this.activeTeamId == 0) {
+                this.currentPhase = 'playerTurn';
+            } else {
+                this.currentPhase = 'enemyTurn';
+            }
+        }
+        /**
+         * On player turn
+         */
+        playerTurn() {
+            // Show Player Turn sprite;
+            this.currentPhase = 'updateTurn';
+        }
+        /**
+         * Update player turn
+         */
+        updatePlayerTurn() {
+            const isAllPlayerFinished = this.allyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
+            if (isAllPlayerFinished) {
+                // Swap active team;
+            }
+        }
+        /**
+         * On Enemy Turn
+         */
+        enemyTurn() {
+            // Show Enemy Turn Sprite
+            this.currentPhase = 'updateTurn';
+        }
+        /**
+         * Update Enemy Turn
+         */
+        updateEnemyTurn() {
+    
+        }
+        /**
+         * Check if battle system is busy.
+         * @returns {Boolean}
+         */
+        isBusy() {
+            return false;
+        }
+    
+    }
+    /**
+     * Get Instance
+     * @returns {TacticalBattleSystem}
+     */
+    TacticalBattleSystem.inst = function() {
+        if (TacticalBattleSystem.instance) {
+            return TacticalBattleSystem.instance;
+        }
+        TacticalBattleSystem.instance = new TacticalBattleSystem();
+        return TacticalBattleSystem.instance;
     }
 
-    const map = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 1, 0, 0, 1, 1, 1, 1, 0],
-        [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-        [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-        [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-        [0, 1, 1, 0, 1, 1, 1, 1, 1, 0],
-        [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]
-    
-    let time = Date.now();
-    var result = GameUtils.floodFill(3, 3, 20, (x, y) => {
-    	//console.log(x, y, map[y][x]);
-    	return true; //map[y][x] == 1;
-    })
-    console.log("Time:", Date.now() - time)
-    
-    result.forEach(({x, y, value}) => {
-    	//map[y][x] = 9;
-    })
-    
-    console.log(result);
-    console.log(map);
+    var DSI_TacticalBattleSystem_Scene_Map_updateScene = Scene_Map.prototype.updateScene;
+    Scene_Map.prototype.updateScene = function() {
+		DSI_TacticalBattleSystem_Scene_Map_updateScene.call(this);
+        this.updateTBS();
+    }
+
+    Scene_Map.prototype.updateTBS = function() {
+        if (SceneManager.isSceneChanging()) return;
+        TacticalBattleSystem.inst().update();
+    }
 
 
 })();
+
 //========================================================================
 // END OF PLUGIN
 //========================================================================
