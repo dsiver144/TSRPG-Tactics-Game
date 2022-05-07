@@ -7,6 +7,7 @@ var $plugins =
 {"name":"GALV_CamControlMZ","status":true,"description":"(v.1.7) Allows greater control over where the game camera is focused. View documentation for plugin commands.","parameters":{"useZoom":"true","bZoom":"1"}},
 {"name":"DSI-Astar","status":true,"description":"(v1.0) A star pathfind plugin by dsiver144","parameters":{}},
 {"name":"DSI-TBS-1-GameUtils","status":true,"description":"(v1.0) A custom plugin by dsiver144","parameters":{"testParam:number":"144"}},
+{"name":"DSI-TBS-2-SpriteUtils","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-TacticleTile","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-TacticleUnit","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-3-TacticleUnitController","status":true,"description":"","parameters":{}},
@@ -14,7 +15,9 @@ var $plugins =
 {"name":"DSI-TBS-2-TacticleMap","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-TacticleRange","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-TacticleRangeManager","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-2-Sprite_TacticleUnitSelection","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-3-TacticleUnitCommandWindow","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-3-TacticleUnitActionListWindow","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-3-TacticleUnitSelectionWindow","status":true,"description":"","parameters":{}},
 {"name":"DSI-TacticalBattleSystem","status":true,"description":"(v1.0) A custom plugin by dsiver144","parameters":{"testParam2:number":"144"}}
 ];

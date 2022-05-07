@@ -99,6 +99,26 @@ GameUtils.setCameraTarget = function(target) {
     $gameMap.camTargetSet(target);
 }
 
+GameUtils.addSpriteToTilemap = function(sprite) {
+    SceneManager._scene._spriteset._tilemap.addChild(sprite);
+}
+
+GameUtils.removeSpriteFromTilemap = function(sprite) {
+    SceneManager._scene._spriteset._tilemap.removeChild(sprite);
+}
+
+GameUtils.addWindow = function(window) {
+    SceneManager._scene.addChild(window);
+}
+
+GameUtils.removeWindow = function(window) {
+    SceneManager._scene.removeChild(window);
+}
+
+ImageManager.loadTBS = function(filename) {
+    return this.loadBitmap("img/tbs/", filename);
+}
+
 class Position {
     /**
      * Position object
@@ -127,7 +147,3 @@ Game_Player.prototype.updateScroll = function(lastScrolledX, lastScrolledY) {
 	DSI_TBS_1_GameUtils_Game_Player_updateScroll.call(this, lastScrolledX, lastScrolledY);
 };
 
-
-//========================================================================
-// END OF PLUGIN
-//========================================================================

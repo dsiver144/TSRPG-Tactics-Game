@@ -55,14 +55,14 @@
  */
 window.TBS = window.TBS || {};
 
-(function() {
+// (function() {
 
     const pluginName = 'DSI-TacticalBattleSystem';
-    let params = PluginManager.parameters(pluginName);
-    params = PluginManager.processParameters(params);
+    let dsiTBS = PluginManager.parameters(pluginName);
+    dsiTBS = PluginManager.processParameters(dsiTBS);
 
     TBS.params = TBS.params || {};
-    TBS.params = {...TBS.params, params};
+    TBS.params = {...TBS.params, dsiTBS};
     
     PluginManager.registerCommand(pluginName, "startBattle", args => {
         const startPos = GameUtils.getAllyPositionEvents();
@@ -91,6 +91,20 @@ window.TBS = window.TBS || {};
              * @type {TacticleCursor}
              */
             this.cursor = new TacticleCursor();
+
+            this.actorListWindow = new Window_TacticleUnitSelectionList(new Rectangle(0, 0, 300, 200));
+            this.actorListWindow.visible = false;
+            this.actorListWindow.deactivate();
+            GameUtils.addWindow(this.actorListWindow);
+
+            this.actorPreviewSprite = new Sprite_TacticleUnitSelection();
+            GameUtils.addSpriteToTilemap(this.actorPreviewSprite);
+            this.actorPreviewSprite.visible = false;
+
+            // this.actorListWindow = new Window_Sel(new Rectangle(0, 0, 300, 200));
+            // this.actorListWindow.visible = false;
+            // this.actorListWindow.deactivate();
+            // GameUtils.addWindow(this.actorListWindow);
         }
         /**
          * Setup battle
@@ -99,9 +113,32 @@ window.TBS = window.TBS || {};
          */
         setup(allyStartPositions, enemyEvents) {
             this.allyStartPositions = allyStartPositions;
+            this.createAllySpotSprites();
+            
             this.enemyEvents = enemyEvents;
-            this.currentPhase = 'init';
-            this.cursor.activate();
+            this.currentPhase = 'selectUnit';
+
+            this.cursor.show();
+            this.moveCursorToFirstSlot();
+        }
+        /**
+         * Move Cursor to first slot.
+         */
+        moveCursorToFirstSlot() {
+            const firstSlot = this.allyStartPositions[0];
+            this.cursor.move(firstSlot.x, firstSlot.y);
+        }
+        /**
+         * Create Ally Spot Sprites
+         */
+        createAllySpotSprites() {
+            this.allySpotSprites = [];
+            this.allyStartPositions.forEach(event => {
+                const sprite = new Sprite_AllySpot(new Position(event.x, event.y));
+                console.log(sprite.customPosition);
+                GameUtils.addSpriteToTilemap(sprite);
+                this.allySpotSprites.push(sprite);
+            });
         }
         /**
          * Reset Battle System
@@ -125,19 +162,22 @@ window.TBS = window.TBS || {};
          */
         updatePhase() {
             switch(this.currentPhase) {
-            case 'setup':
-                
+            case 'selectUnit':
+                this.onSelectUnits();
+                break;
+            case 'updateSelectUnit':
+                break;
             case 'init':
-                this.initUnits();
+                this.onInitUnits();
                 break;
             case 'battleStart':
-                this.battleStart();
+                this.onBattleStart();
                 break;
             case 'playerTurn':
-                this.playerTurn();
+                this.onPlayerTurn();
                 break;
             case 'enemyTurn':
-                this.enemyTurn();
+                this.onEnemyTurn();
                 break;
             case 'updateTurn':
                 this.activeTeamId == 0 ? this.updatePlayerTurn() : this.updateEnemyTurn();
@@ -158,15 +198,71 @@ window.TBS = window.TBS || {};
             this.cursor.update();
         }
         /**
+         * Select unit phase
+         */
+        onSelectUnits() {
+
+            this.actorListWindow.activate();
+            this.actorListWindow.refresh();
+            this.actorListWindow.visible = true;
+
+            this.cursor.setOnOKCallback(() => {
+                if (!this.allyStartPositions.some(event => event.x === this.cursor.position.x && event.y === this.cursor.position.y)) {
+                    SoundManager.playBuzzer();
+                    return;
+                }   
+                SoundManager.playOk();
+                this.cursor.deactivate();
+
+                this.actorPreviewSprite.enableInput(
+                    (direction) => {
+                        // On Preview OK
+                        SoundManager.playSave();
+                        this.actorListWindow.activate();
+                        this.actorPreviewSprite.hideCharacter();
+                        this.actorPreviewSprite.disableInput();
+                        
+
+                        // Todo: Spawn ally unit here.
+                        const character = new Game_Character();
+                        const actor = this.actorListWindow.currentExt();
+                        this.actorListWindow.removeActor(actor);
+                        
+                        console.log({actor});
+                        character.setImage(actor.characterName(), actor.characterIndex());
+                        character.setDirection(direction);
+                        character.locate(this.cursor.position.x, this.cursor.position.y);
+                        const sprite = new Sprite_Character(character);
+                        console.log(sprite);
+                        GameUtils.addSpriteToTilemap(sprite);
+                    }
+                ,   () => {
+                        // ON Preview Cancel
+                        SoundManager.playCancel();
+                        this.cursor.activate();
+                        this.actorPreviewSprite.disableInput();
+                    }
+                )
+
+            })
+            this.cursor.setOnCancelCallback(() => {
+                this.actorListWindow.activate();
+                this.cursor.deactivate();
+                this.actorPreviewSprite.hideCharacter();
+            })
+
+            this.currentPhase = 'updateSelectUnit';
+        }
+        /**
          * Init units for both side
          */
-        initUnits() {
+        onInitUnits() {
             this.currentPhase = 'battleStart';
         }
         /**
          * Battle Start
          */
-        battleStart() {
+        onBattleStart() {
             this.setActiveTeam(0);
         }
         /**
@@ -190,7 +286,7 @@ window.TBS = window.TBS || {};
         /**
          * On player turn
          */
-        playerTurn() {
+        onPlayerTurn() {
             // Show Player Turn sprite;
             this.currentPhase = 'updateTurn';
         }
@@ -206,7 +302,7 @@ window.TBS = window.TBS || {};
         /**
          * On Enemy Turn
          */
-        enemyTurn() {
+        onEnemyTurn() {
             // Show Enemy Turn Sprite
             this.currentPhase = 'updateTurn';
         }
@@ -249,7 +345,7 @@ window.TBS = window.TBS || {};
     }
 
 
-})();
+// })();
 
 //========================================================================
 // END OF PLUGIN

@@ -13,6 +13,44 @@ class TacticleCursor {
          * @type {boolean} - Cursor active status
          */
         this.active = false;
+        /**
+         * @type {number} - the current delay until player can press
+         */
+        this.moveDelay = 0;
+        /**
+         * @type {number} - the amount of frames that player need to press the button to move.
+         */
+        this.moveDelayAmount = 4;
+        this.createCursorSprite();
+    }
+    /**
+     * Create cursor sprite
+     */
+    createCursorSprite() {
+        this.sprite = new Sprite_TacticleCursor(this);
+        this.sprite.visible = false;
+        GameUtils.addSpriteToTilemap(this.sprite);
+    }
+    /**
+     * Destroy cursor sprite
+     */
+    destroyCursorSprite() {
+        if (!this.sprite) return;
+        GameUtils.removeSpriteFromTilemap(this.sprite);
+    }
+    /**
+     * Show cursor sprite
+     */
+    show() {
+        if (!this.sprite) return;
+        this.sprite.visible = true;
+    }
+    /**
+     * Hide cursor sprite
+     */
+    hide() {
+        if (!this.sprite) return;
+        this.sprite.visible = false;
     }
     /**
      * Activate cursor so player can move.
@@ -36,7 +74,8 @@ class TacticleCursor {
         y = Math.max(0, Math.min(y, $gameMap.height() - 1));
         this.position.x = x;
         this.position.y = y;
-        console.log("Move", this.position);
+
+        console.log(this.position);
     }
     /**
      * Screen X
@@ -45,7 +84,7 @@ class TacticleCursor {
     screenX() {
         const tw = $gameMap.tileWidth();
         const scrollX = $gameMap.adjustX(this.position.x);
-        return Math.floor(scrollX * tw + tw / 2);
+        return Math.floor(scrollX * tw);
     };
     /**
      * Screen Y
@@ -55,7 +94,7 @@ class TacticleCursor {
         const th = $gameMap.tileHeight();
         const scrollY = $gameMap.adjustY(this.position.y);
         return Math.floor(
-            scrollY * th + th
+            scrollY * th
         );
     };
     /**
@@ -77,26 +116,72 @@ class TacticleCursor {
      */
     update() {
         this.isInsideValidPositions();
-        this.updateMoveByInput();
+        this.updateInput();
     }
     /**
      * Update cursor move by Input.
      */
-    updateMoveByInput() {
+    updateInput() {
         if (!this.active) return;
-        if (Input.isRepeated('left')) {
-            this.move(this.position.x - 1, this.position.y);
+        if (Input.isPressed('left')) {
+            this.moveByInput(-1, 0);
         }
-        if (Input.isRepeated('right')) {
-            this.move(this.position.x + 1, this.position.y);
+        if (Input.isPressed('right')) {
+            this.moveByInput(1, 0);
         }
-        if (Input.isRepeated('down')) {
-            this.move(this.position.x, this.position.y + 1);
+        if (Input.isPressed('down')) {
+            this.moveByInput(0, 1);
         }
-        if (Input.isRepeated('up')) {
-            this.move(this.position.x, this.position.y - 1);
+        if (Input.isPressed('up')) {
+            this.moveByInput(0, -1);
         }
-        
+        if (TouchInput.isTriggered()) {
+            const x = $gameMap.canvasToMapX(TouchInput.x);
+            const y = $gameMap.canvasToMapY(TouchInput.y);
+            this.move(x, y);
+        }
+        if (Input.isTriggered('ok')) {
+            Input.update();
+            this.onOKCallback && this.onOKCallback();
+        }
+        if (Input.isTriggered('cancel')) {
+            Input.update();
+            this.onCancelCallback && this.onCancelCallback();
+        }
+    }
+    /**
+     * Check if player can move the cursor
+     * @returns {boolean}
+     */
+    canMove() {
+        return this.moveDelay == 0;
+    }
+    /**
+     * Move cursor by input
+     * @param {number} dx 
+     * @param {number} dy 
+     */
+    moveByInput(dx, dy) {
+        if (this.canMove()) {
+            this.move(this.position.x + dx, this.position.y + dy);
+            this.moveDelay = this.moveDelayAmount;
+        } else {
+            this.moveDelay -= 1;
+        }
+    }
+    /**
+     * Set On OK Callback
+     * @param {Function} callback 
+     */
+    setOnOKCallback(callback) {
+        this.onOKCallback = callback;
+    }
+    /**
+     * Set On Cancel Callback
+     * @param {Function} callback 
+     */
+    setOnCancelCallback(callback) {
+        this.onCancelCallback = callback;
     }
     /**
      * Check if cursor is inside valid action positions.
@@ -105,6 +190,67 @@ class TacticleCursor {
     isInsideValidPositions() {
         const valid = this.validActionPositions.some(position => this.position.x == position.x && this.position.y == position.y);
         return valid;
+    }
+
+}
+
+class Sprite_TacticleCursor extends Sprite_OnMapObject {
+    /**
+     * Tacticle Cursor Sprite
+     * @param {TacticleCursor} cursor 
+     */
+    constructor(cursor) {
+        super();
+        /**
+         * @type {TacticleCursor} - referent to current cursor.
+         */
+        this.cursor = cursor;
+        this.bitmap = ImageManager.loadTBS('cursor');
+        this.frameIndex = 0;
+        this.maxFrames = 2;
+        this.frameWidth = 48;
+        this.frameHeight = 48;
+        this.frameCount = 0;
+        this.frameChangeCount = 20;
+        this.updateAnimation();
+    }
+    /**
+     * Update per frame
+     */
+    update() {
+        super.update();
+        this.updateAnimation();
+    }
+    /**
+     * Update cursor animation
+     */
+    updateAnimation() {
+        this.frameCount = (this.frameCount + 1) % this.frameChangeCount;
+        if (this.frameCount === 0) {
+            this.frameIndex = (this.frameIndex + 1) % this.maxFrames;
+        }
+        this.setFrame(this.frameIndex * this.frameWidth, 0, this.frameWidth, this.frameHeight);
+    }
+    /**
+     * Screen X
+     * @returns {number}
+     */
+    screenX() {
+        return this.cursor.screenX();
+    }
+    /**
+     * Screen Y
+     * @returns {number}
+     */
+    screenY() {
+        return this.cursor.screenY();
+    }
+    /**
+     * Screen Z
+     * @returns {number}
+     */
+    screenZ() {
+        return 1;
     }
 
 }
