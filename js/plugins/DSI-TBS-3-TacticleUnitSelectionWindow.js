@@ -49,7 +49,7 @@ class Window_TacticleUnitSelectionList extends Window_Command {
         const actor = this.currentExt();
 
         const battleSystem = TacticalBattleSystem.inst();
-        battleSystem.actorPreviewSprite.updateCharacter(actor.characterName(), actor.characterIndex());
+        battleSystem.actorPreviewSprite.setImage(actor.characterName(), actor.characterIndex());
         battleSystem.actorPreviewSprite.visible = true;
         battleSystem.cursor.activate();
 

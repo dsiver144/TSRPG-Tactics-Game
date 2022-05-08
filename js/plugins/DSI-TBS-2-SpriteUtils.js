@@ -88,9 +88,65 @@ class Sprite_AllySpot extends Sprite_StaticMapObject {
         super(position);
         this.bitmap = ImageManager.loadTBS('BlueSquare');
     }
-
+    /**
+     * Screen Z
+     * @returns {number}
+     */
     screenZ() {
         return 0;
     }
 
+}
+
+class Sprite_StaticRange extends Sprite_StaticMapObject {
+    /**
+     * 
+     * @param {Position} position 
+     */
+     constructor(position, bitmapName = 'BlueSquare') {
+        super(position);
+        this.bitmap = ImageManager.loadTBS(bitmapName);
+    }
+    /**
+     * Screen Z
+     * @returns {number}
+     */
+    screenZ() {
+        return 0;
+    }
+}
+
+class Sprite_DynamicRange extends Sprite {
+    /**
+     * Sprite_DynamicRange
+     * @param {Sprite} target
+     * @param {Position} offset
+     */
+    constructor(target, offset, bitmapName = 'RedSquare') {
+        super();
+        /**
+         * @type {Sprite}
+         */
+        this.target = target;
+        /**
+         * @type {Position}
+         */
+        this.offset = offset;
+        this.bitmap = ImageManager.loadTBS(bitmapName);
+    }
+    /**
+     * Update per frame.
+     */
+    update() {
+        super.update();
+        this.updatePosition();
+    }
+    /**
+     * Update position
+     */
+    updatePosition() {
+        this.x = this.target.x + this.offset.x * $gameMap.tileWidth();
+        this.y = this.target.y + this.offset.y * $gameMap.tileHeight();
+        this.z = 0;
+    }
 }

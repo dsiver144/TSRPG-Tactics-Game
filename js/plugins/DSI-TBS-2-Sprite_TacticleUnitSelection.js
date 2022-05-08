@@ -1,27 +1,34 @@
 class Sprite_TacticleUnitSelection extends Sprite_Character {
-
     constructor() {
         var character = new Game_CharacterBase();
         character.setImage("0", 0);
         super(character);
-        this.opacity = 100;
-        this._count = 0;
-
     }
-
-    updateCharacter(name, index) {
+    /**
+     * Set character image
+     * @param {string} name 
+     * @param {number} index 
+     */
+    setImage(name, index) {
         this._character.setImage(name, index);
+        this.renderable = true;
     }
-
+    /**
+     * Hide character
+     */
     hideCharacter() {
-        this.updateCharacter("", 0);
+        this.renderable = false;
     }
-
+    /**
+     * Update per frame.
+     */
     update() {
         super.update();
         this.updateInput();
     }
-
+    /**
+     * Update position
+     */
     updatePosition() {
         const tw = $gameMap.tileWidth();
         const th = $gameMap.tileHeight();
@@ -29,7 +36,10 @@ class Sprite_TacticleUnitSelection extends Sprite_Character {
         this.y = TacticalBattleSystem.inst().cursor.screenY() + th;
         this.z = 100;
     }
-
+    /**
+     * Update input
+     * @returns {void}
+     */
     updateInput() {
         if (!this.inputEnabled())
             return;
@@ -45,17 +55,26 @@ class Sprite_TacticleUnitSelection extends Sprite_Character {
             this._character.setDirection(Input.dir4);
         }
     }
-
+    /**
+     * Check if input is enabled
+     * @returns {boolean}
+     */
     inputEnabled() {
         return this._inputEnabled;
     }
-
+    /**
+     * Enable input with callbacks.
+     * @param {Function} onOKCallback 
+     * @param {Function} onCancelCallback 
+     */
     enableInput(onOKCallback, onCancelCallback) {
         this._inputEnabled = true;
         this.onOKCallback = onOKCallback;
         this.onCancelCallback = onCancelCallback;
     }
-
+    /**
+     * Disable input and clear callbacks.
+     */
     disableInput() {
         this.onOKCallback = null;
         this.onCancelCallback = null;

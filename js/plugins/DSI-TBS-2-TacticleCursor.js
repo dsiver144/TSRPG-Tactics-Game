@@ -1,3 +1,14 @@
+//=======================================================================================================
+// > TacticleCursor
+//=======================================================================================================
+
+const POSITION_OFFSET_BY_DIRECTION = {
+    2: [0, 1],
+    4: [-1, 0],
+    6: [1, 0],
+    8: [0, -1],
+}
+
 class TacticleCursor {
 
     constructor() {
@@ -123,17 +134,9 @@ class TacticleCursor {
      */
     updateInput() {
         if (!this.active) return;
-        if (Input.isPressed('left')) {
-            this.moveByInput(-1, 0);
-        }
-        if (Input.isPressed('right')) {
-            this.moveByInput(1, 0);
-        }
-        if (Input.isPressed('down')) {
-            this.moveByInput(0, 1);
-        }
-        if (Input.isPressed('up')) {
-            this.moveByInput(0, -1);
+        if (Input.dir4 != 0) {
+            const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
+            this.moveByInput(x, y);
         }
         if (TouchInput.isTriggered()) {
             const x = $gameMap.canvasToMapX(TouchInput.x);
@@ -142,12 +145,20 @@ class TacticleCursor {
         }
         if (Input.isTriggered('ok')) {
             Input.update();
-            this.onOKCallback && this.onOKCallback();
+            this.onOKCallback && this.onOKCallback(this.position.x, this.position.y);
         }
         if (Input.isTriggered('cancel')) {
             Input.update();
             this.onCancelCallback && this.onCancelCallback();
         }
+    }
+    /**
+     * Get Position Offset
+     * @param {number} direction 
+     * @returns {number[]}
+     */
+    getPositionOffsetByDirection(direction) {
+        return POSITION_OFFSET_BY_DIRECTION[direction];
     }
     /**
      * Check if player can move the cursor
@@ -166,7 +177,7 @@ class TacticleCursor {
             this.move(this.position.x + dx, this.position.y + dy);
             this.moveDelay = this.moveDelayAmount;
         } else {
-            this.moveDelay -= 1;
+            this.moveDelay -= 1; 
         }
     }
     /**
@@ -182,6 +193,13 @@ class TacticleCursor {
      */
     setOnCancelCallback(callback) {
         this.onCancelCallback = callback;
+    }
+    /**
+     * Clear all callbacks
+     */
+    clearAllCallbacks() {
+        this.onOKCallback = null;
+        this.onCancelCallback = null;
     }
     /**
      * Check if cursor is inside valid action positions.
