@@ -32,6 +32,18 @@ GameUtils.getParam = function(param) {
     return TBS.params[param];
 }
 
+/**
+ * @interface
+ */
+class FLOOD_FILL_TILE  {
+    constructor(x, y, outer, value) {
+        this.x = x;
+        this.y = y;
+        this.outer = outer;
+        this.value = value;
+    }
+}
+
 GameUtils.floodFillOffsets = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 /**
  * Floodfill
@@ -39,7 +51,7 @@ GameUtils.floodFillOffsets = [[-1, 0], [1, 0], [0, -1], [0, 1]];
  * @param {number} y 
  * @param {number} range 
  * @param {Function} conditionFunction 
- * @returns {{x: number, y: number, value: number}[]}
+ * @returns {FLOOD_FILL_TILE[]}
  */
 GameUtils.floodFill = function(x, y, range, conditionFunction) {
     const result = [];
@@ -48,7 +60,6 @@ GameUtils.floodFill = function(x, y, range, conditionFunction) {
     let originalX = x;
     let originalY = y;
     let originalRange = range;
-    
     // Recursive function to fill the array.
     function doFill(targetX, targetY) {
         const nextTiles = [];
@@ -58,24 +69,14 @@ GameUtils.floodFill = function(x, y, range, conditionFunction) {
             const range = Math.abs(checkX - originalX) + Math.abs(checkY - originalY);
             if (!visitedTiles[`${checkX}-${checkY}`]) {
                 if (conditionFunction(checkX, checkY, range)) {
-                    const tile = {
-                        x: checkX,
-                        y: checkY,
-                        outer: false,
-                        value: range
-                    }
+                    const tile = new FLOOD_FILL_TILE(checkX, checkY, false, range);
                     result.push(tile);
                     if (range < originalRange) {
                         // This prevent the recursion function keep calling.  
                         nextTiles.push([checkX, checkY]);
                     }
                 } else {
-                    const tile = {
-                        x: checkX,
-                        y: checkY,
-                        value: range,
-                        outer: true
-                    }
+                    const tile = new FLOOD_FILL_TILE(checkX, checkY, true, range);
                     result.push(tile);
                 }
                 visitedTiles[`${checkX}-${checkY}`] = true;
@@ -249,4 +250,8 @@ var DSI_TBS_1_GameUtils_Scene_Boot_onDatabaseLoaded = Scene_Boot.prototype.onDat
 Scene_Boot.prototype.onDatabaseLoaded = function() {
 	DSI_TBS_1_GameUtils_Scene_Boot_onDatabaseLoaded.call(this);
     GameUtils.setupTBSEnemies();
+};
+
+Game_Map.prototype.blockableEventsXy = function(x, y) {
+    return this.events().filter(event => event.posNt(x, y) && event.isNormalPriority());
 };

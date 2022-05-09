@@ -9,27 +9,35 @@ class TacticleRangeManager {
     /**
      * Calculate move ranges
      * @param {TacticleUnit} unit 
-     * @returns {Position[]}
+     * @returns {FLOOD_FILL_TILE[]}
      */
     calculateMoveRanges(unit) {
         const ranges = GameUtils.floodFill(unit.position.x, unit.position.y, unit.moveRange(), (x, y) => {
             var passable = $gameMap.checkPassage(x, y, 0x0f);
             var hasUnit = TacticalBattleSystem.inst().getUnitAt(x, y);
-            return !hasUnit && passable;
+            var hasEvent = $gameMap.blockableEventsXy(x, y)[0];
+            return !hasUnit && !hasEvent && passable;
         });
         return ranges;
     }
-
+    /**
+     * 
+     * @param {TacticleUnit} unit 
+     * @returns {FLOOD_FILL_TILE[]}
+     */
     caculateActionRanges(unit) {
         return [];
     }
-
+    /**
+     * Show Move Range At Unit
+     * @param {TacticleUnit} unit 
+     */
     showMoveRangeSprites(unit) {
         const ranges = this.calculateMoveRanges(unit);
         ranges.forEach(rangeTile => {
             const {x, y} = rangeTile;
             if (rangeTile.outer) return;
-            const rangeSprite = new Sprite_StaticRange(new Position(x, y), rangeTile.attack ? "RedSquare" : "BlueSquare");
+            const rangeSprite = new Sprite_StaticRange(new Position(x, y), false ? "RedSquare" : "BlueSquare");
             // rangeSprite.bitmap.drawText(`${x}-${y}`, 0, 0, 48, 48, 'center');
             GameUtils.addSpriteToTilemap(rangeSprite);
         })

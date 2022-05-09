@@ -134,6 +134,8 @@ class TacticleCursor {
      */
     updateInput() {
         if (!this.active) return;
+        if (TacticalBattleSystem.inst().isBusy()) return;
+        
         if (Input.dir4 != 0) {
             const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
             this.moveByInput(x, y);

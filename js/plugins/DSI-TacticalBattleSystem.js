@@ -79,6 +79,10 @@ window.TBS = window.TBS || {};
         constructor() {
             this.currentPhase = 'none';
             /**
+             * @type {number}
+             */
+            this.totalTurns = 0;
+            /**
              * @type {TacticleUnit[]}
              */
             this.allyUnits = [];
@@ -121,6 +125,8 @@ window.TBS = window.TBS || {};
          * @param {Game_Event[]} enemyEvents 
          */
         setup(allyStartPositions, enemyEvents) {
+            this.totalTurns = 0;
+
             this.allyStartPositions = allyStartPositions;
             this.createAllySpotSprites();
             
@@ -304,7 +310,8 @@ window.TBS = window.TBS || {};
             this.currentPhase = 'init';
         }
         /**
-         * Chcekc if player can cancel unit selection and process to go to battle start.
+         * Check if player can cancel unit selection and process to go to battle start.
+         * @todo
          * @returns {boolean}
          */
         canCancelUnitSelection() {
@@ -363,11 +370,18 @@ window.TBS = window.TBS || {};
          * Choose next turn base on current active team id
          */
         determineTurn() {
+            this.totalTurns += 1;
             if (this.activeTeamId == 0) {
                 this.currentPhase = 'playerTurn';
             } else {
                 this.currentPhase = 'enemyTurn';
             }
+        }
+        /**
+         * Swap active team
+         */
+        swapActiveTeam() {
+            this.activeTeamId = this.activeTeamId == 0 ? 1 : 0;
         }
         /**
          * On player turn
@@ -378,23 +392,30 @@ window.TBS = window.TBS || {};
             this.currentPhase = 'updateTurn';
 
             this.cursor.activate();
-            this.cursor.setOnOKCallback((x, y) => {
-                const allyUnit = [...this.allyUnits].filter(unit => unit.position.x === x && unit.position.y === y)[0];
-                const enemyUnit = [...this.enemyUnits].filter(unit => unit.position.x === x && unit.position.y === y)[0];
-                if (allyUnit) {
-                    console.log("Select ally: ", allyUnit);
-                    allyUnit.controller.onSelect();
-                    TacticleRangeManager.inst().showMoveRangeSprites(allyUnit);
-                }
-                if (enemyUnit) {
-                    console.log("Select enemy: ", enemyUnit);
-                    TacticleRangeManager.inst().showMoveRangeSprites(enemyUnit);
-
-                }
-            })
+            this.cursor.setOnOKCallback(this.cursorOnPlayerTurn.bind(this));
+            
             this.allyUnits.forEach((unit) => {
                 unit.onTurnStart();
             })
+        }
+        /**
+         * Cursor on player turn.
+         * @param {number} x 
+         * @param {number} y 
+         */
+        cursorOnPlayerTurn(x, y) {
+            const allyUnit = [...this.allyUnits].filter(unit => unit.position.x === x && unit.position.y === y)[0];
+            const enemyUnit = [...this.enemyUnits].filter(unit => unit.position.x === x && unit.position.y === y)[0];
+            if (allyUnit) {
+                console.log("Select ally: ", allyUnit);
+                allyUnit.controller.onSelect();
+                TacticleRangeManager.inst().showMoveRangeSprites(allyUnit);
+                allyUnit.actionPoints = 0;
+            }
+            if (enemyUnit) {
+                console.log("Select enemy: ", enemyUnit);
+                TacticleRangeManager.inst().showMoveRangeSprites(enemyUnit);
+            }
         }
         /**
          * Update player turn
@@ -402,12 +423,22 @@ window.TBS = window.TBS || {};
         updatePlayerTurn() {
             const isAllPlayerFinished = this.allyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
             if (isAllPlayerFinished) {
-                this.allyUnits.forEach((unit) => {
-                    unit.onTurnEnd();
-                });
-                // Swap active team;
-                this.determineTurn();
+                this.onPlayerTurnEnd();
             }
+        }
+        /**
+         * On Player Turn End.
+         */
+        onPlayerTurnEnd() {
+            this.allyUnits.forEach((unit) => {
+                unit.onTurnEnd();
+            });
+
+            this.cursor.deactivate();
+            this.cursor.clearAllCallbacks();
+
+            this.swapActiveTeam();
+            this.determineTurn();
         }
         /**
          * On Enemy Turn
@@ -416,12 +447,30 @@ window.TBS = window.TBS || {};
             // Show Enemy Turn Sprite
             this.showPhaseTextSprite("EnemyTurn");
             this.currentPhase = 'updateTurn';
+
+            setTimeout(() => {
+                this.enemyUnits.forEach(u => u.actionPoints = 0);
+            }, 1000);
         }
         /**
          * Update Enemy Turn
          */
         updateEnemyTurn() {
-    
+            const isAllPlayerFinished = this.enemyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
+            if (isAllPlayerFinished) {
+                this.onEnemyTurnEnd();
+            }
+        }
+        /**
+         * On Enemy Turn End.
+         */
+        onEnemyTurnEnd() {
+            this.enemyUnits.forEach((unit) => {
+                unit.onTurnEnd();
+            });
+
+            this.swapActiveTeam();
+            this.determineTurn();
         }
         /**
          * Check if battle system is busy.
