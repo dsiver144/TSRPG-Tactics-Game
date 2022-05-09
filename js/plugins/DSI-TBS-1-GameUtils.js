@@ -41,6 +41,7 @@ class FLOOD_FILL_TILE  {
         this.y = y;
         this.outer = outer;
         this.value = value;
+        this.totalEdges = 0;
     }
 }
 
@@ -54,14 +55,15 @@ GameUtils.floodFillOffsets = [[-1, 0], [1, 0], [0, -1], [0, 1]];
  * @returns {FLOOD_FILL_TILE[]}
  */
 GameUtils.floodFill = function(x, y, range, conditionFunction) {
-    const result = [];
+    const result = {};
     const visitedTiles = {};
     visitedTiles[`${x}-${y}`] = true;
     let originalX = x;
     let originalY = y;
     let originalRange = range;
+    let edgeCounter = {};
     // Recursive function to fill the array.
-    function doFill(targetX, targetY) {
+    function doFill(targetX, targetY, edges) {
         const nextTiles = [];
         GameUtils.floodFillOffsets.forEach(([offsetX, offsetY]) => {
             const checkX = targetX + offsetX;
@@ -70,24 +72,37 @@ GameUtils.floodFill = function(x, y, range, conditionFunction) {
             if (!visitedTiles[`${checkX}-${checkY}`]) {
                 if (conditionFunction(checkX, checkY, range)) {
                     const tile = new FLOOD_FILL_TILE(checkX, checkY, false, range);
-                    result.push(tile);
+                    tile.totalEdges = edges;
+                    result[`${checkX}-${checkY}`] = tile;
                     if (range < originalRange) {
                         // This prevent the recursion function keep calling.  
                         nextTiles.push([checkX, checkY]);
                     }
-                } else {
-                    const tile = new FLOOD_FILL_TILE(checkX, checkY, true, range);
-                    result.push(tile);
-                }
+                } 
                 visitedTiles[`${checkX}-${checkY}`] = true;
             }
-        })
+        });
         nextTiles.forEach(([nextX, nextY]) => {
-            doFill(nextX, nextY, range - 1);
+            doFill(nextX, nextY, 0);
         })  
     }
-    doFill(x, y, range - 1);
-    return result;
+    doFill(x, y, 1);
+    // Calculate edges
+    Object.values(result).forEach(tile => {
+        const {x, y} = tile;
+        const topTile = result[`${x}-${y - 1}`];
+        const bottomTile = result[`${x}-${y + 1}`];
+        const leftTile = result[`${x - 1}-${y}`];
+        const rightTile = result[`${x + 1}-${y}`];
+        let totalEdges = 0;
+        totalEdges += (topTile ? 1 : 0);
+        totalEdges += (bottomTile ? 1 : 0);
+        totalEdges += (leftTile ? 1 : 0);
+        totalEdges += (rightTile ? 1 : 0);
+        tile.totalEdges += totalEdges;
+    })
+
+    return Object.values(result);
 }
 /**
  * Get Ally Position Events
@@ -153,24 +168,105 @@ GameUtils.setupTBSEnemies = function() {
     })
 }
 /**
+ * Setup TBS Skills
+ */
+GameUtils.setupTBSSkills = function() {
+    // console.log($dataEnemies);
+    $dataSkills.forEach((skill, index) => {
+        if (!skill) return;
+        const lines = skill.note.split(/[\r\n]+/i);
+        const skillData = GameUtils.parseSkillData(lines);
+        skill.tbsSkill = skillData;
+    })
+}
+/**
+ * Setup TBS Weapons
+ */
+GameUtils.setupTBSWeapons = function() {
+    $dataWeapons.forEach((weapon, index) => {
+        if (!weapon) return;
+        const lines = weapon.note.split(/[\r\n]+/i);
+        const weaponData = GameUtils.parseWeaponData(lines);
+        weapon.tbsWeapon = weaponData;
+    })
+}
+/**
+ * Parse Skill Data From Note
+ * @param {string[]} lines 
+ * @returns {TBS_SkillData}
+ */
+ GameUtils.parseSkillData = function(lines) {
+    /**
+     * @type {TBS_SkillData}
+     */
+    let skillData = null;
+    let readNotetag = false;
+    lines.forEach(line => {
+        if (line.match(/<tbs skill>/i)) {
+            readNotetag = true;
+            skillData = new TBS_SkillData();
+            return;
+        }
+        if (line.match(/<\/tbs skill>/i)) {
+            readNotetag = false;
+            return;
+        }
+        if (readNotetag) {
+            if (line.match(/^range:\s*(.+)/i)) {
+                const [min, max] = RegExp.$1.split(',').map(n => Number(n));
+                skillData.range.setMin(min).setMax(max);
+            }
+            if (line.match(/^diagonal:\s*(true|false)/i)) {
+                skillData.range.setDiagonal(RegExp.$1 === 'true');
+            }
+            if (line.match(/^penetrate:\s*(true|false)/i)) {
+                skillData.range.setPenerate(RegExp.$1 === 'true');
+            }
+        }
+    })
+    return skillData;
+}
+/**
+ * Parse Weapon Data From Note
+ * @param {string[]} lines 
+ * @returns {TBS_WeaponData}
+ */
+ GameUtils.parseWeaponData = function(lines) {
+    /**
+     * @type {TBS_WeaponData}
+     */
+    let weaponData = null;
+    let readNotetag = false;
+    lines.forEach(line => {
+        if (line.match(/<tbs weapon>/i)) {
+            readNotetag = true;
+            weaponData = new TBS_WeaponData();
+            return;
+        }
+        if (line.match(/<\/tbs weapon>/i)) {
+            readNotetag = false;
+            return;
+        }
+        if (readNotetag) {
+            if (line.match(/^skill:\s*(\d+)/i)) {
+                weaponData.setSkill(Number(RegExp.$1));
+            }
+        }
+    })
+    return weaponData;
+}
+
+{/* <tbs skill>
+range: 1, 1
+</tbs skill> */}
+
+/**
  * Get Event Sprite On Map
  * @param {number} eventId 
  * @returns {Sprite_Character}
  */
 GameUtils.getEventSprite = function(eventId) {
     return SceneManager._scene._spriteset._characterSprites.filter(e => e._character._eventId === eventId)[0];
-}
-
-class TBS_EnemyData {
-
-    constructor() {
-        this.enemyId = 0;
-        this.mov = 0;
-    }
-
-    isValid() {
-        return this.enemyId != 0 || this.mov != 0;
-    }
 }
 
 /**
@@ -250,6 +346,8 @@ var DSI_TBS_1_GameUtils_Scene_Boot_onDatabaseLoaded = Scene_Boot.prototype.onDat
 Scene_Boot.prototype.onDatabaseLoaded = function() {
 	DSI_TBS_1_GameUtils_Scene_Boot_onDatabaseLoaded.call(this);
     GameUtils.setupTBSEnemies();
+    GameUtils.setupTBSSkills();
+    GameUtils.setupTBSWeapons();
 };
 
 Game_Map.prototype.blockableEventsXy = function(x, y) {

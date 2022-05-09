@@ -29,6 +29,14 @@ class TacticleUnit {
          * @type {number}
          */
         this.actionPoints = 0;
+        /**
+         * @type {FLOOD_FILL_TILE[]}
+         */
+        this.movableTiles = [];
+        /**
+         * @type {FLOOD_FILL_TILE[]}
+         */
+        this.actionTiles = [];
     }
     /**
      * Set Controller
@@ -101,6 +109,13 @@ class TacticleUnit {
      * @returns {number}
      */
     moveRange() {
+        return 0;
+    }
+    /**
+     * Attack Range
+     * @returns {number}
+     */
+    attackRange() {
         return 0;
     }
     /**
@@ -213,7 +228,14 @@ class Tacticle_EnemyUnit extends TacticleUnit {
      * @returns {number}
      */
     moveRange() {
-    return this.battler.enemy().tbsEnemy.mov;
+        return this.battler.enemy().tbsEnemy.mov;
+    }
+    /**
+     * Attack Range
+     * @returns {number}
+     */
+    attackRange() {
+        return 1;
     }
 }
 
@@ -232,5 +254,12 @@ class Tacticle_AllyUnit extends TacticleUnit {
      */
     moveRange() {
         return this.battler.luk;
+    }
+    /**
+     * Attack Range
+     * @returns {number}
+     */
+    attackRange() {
+        return 1;
     }
 }

@@ -22,6 +22,9 @@ class TacticleRange {
     constructor(min, max) {
         this.min = min;
         this.max = max;
+        this.diagonal = true;
+        this.penerate = false;
+        this.aoe = null;
     }
     /**
      * Set Min

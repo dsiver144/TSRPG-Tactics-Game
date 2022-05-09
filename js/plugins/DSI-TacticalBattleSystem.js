@@ -83,13 +83,8 @@ window.TBS = window.TBS || {};
              */
             this.totalTurns = 0;
             /**
-             * @type {TacticleUnit[]}
+             * @type {number}
              */
-            this.allyUnits = [];
-            /**
-             * @type {TacticleUnit[]}
-             */
-            this.enemyUnits = [];
             this.activeTeamId = 0;
             /**
              * @type {TacticleCursor}
@@ -171,8 +166,7 @@ window.TBS = window.TBS || {};
          */
         reset() {
             this.currentPhase = 'none';
-            this.allyUnits = [];
-            this.enemyUnits = [];
+            TacticalUnitManager.inst().reset();
         }
         /**
          * Update every frame
@@ -215,16 +209,7 @@ window.TBS = window.TBS || {};
          * Update Units for both side
          */
         updateUnits() {
-            this.allyUnits.forEach(unit => unit.update());
-            this.enemyUnits.forEach(unit => unit.update());
-        }
-        /**
-         * Get unit at
-         * @param {number} x
-         * @param {number} y 
-         */
-        getUnitAt(x, y) {
-            return this.allyUnits.concat(this.enemyUnits).filter(unit => unit.position.x === x && unit.position.y === y)[0];
+            TacticalUnitManager.inst().updateUnits();
         }
         /**
          * Update cursor
@@ -271,7 +256,8 @@ window.TBS = window.TBS || {};
                         allyUnit.setBattler(actor);
                         allyUnit.setSprite(sprite);
                         allyUnit.setFaceDirection(direction);
-                        this.allyUnits.push(allyUnit);
+                        
+                        TacticalUnitManager.inst().addAllyUnit(allyUnit);
                         
                         GameUtils.addSpriteToTilemap(sprite);
                     }
@@ -336,7 +322,7 @@ window.TBS = window.TBS || {};
                 enemyUnit.setBattler(enemy);
                 enemyUnit.setSprite(enemySprite);
                 enemyUnit.setFaceDirection(event.direction());
-                this.enemyUnits.push(enemyUnit);
+                TacticalUnitManager.inst().addEnemyUnit(enemyUnit);
             });
         }
         /**
@@ -394,9 +380,9 @@ window.TBS = window.TBS || {};
             this.cursor.activate();
             this.cursor.setOnOKCallback(this.cursorOnPlayerTurn.bind(this));
             
-            this.allyUnits.forEach((unit) => {
+            TacticalUnitManager.inst().allyUnits.forEach((unit) => {
                 unit.onTurnStart();
-            })
+            });
         }
         /**
          * Cursor on player turn.
@@ -404,24 +390,25 @@ window.TBS = window.TBS || {};
          * @param {number} y 
          */
         cursorOnPlayerTurn(x, y) {
-            const allyUnit = [...this.allyUnits].filter(unit => unit.position.x === x && unit.position.y === y)[0];
-            const enemyUnit = [...this.enemyUnits].filter(unit => unit.position.x === x && unit.position.y === y)[0];
-            if (allyUnit) {
-                console.log("Select ally: ", allyUnit);
-                allyUnit.controller.onSelect();
-                TacticleRangeManager.inst().showMoveRangeSprites(allyUnit);
-                allyUnit.actionPoints = 0;
-            }
-            if (enemyUnit) {
-                console.log("Select enemy: ", enemyUnit);
-                TacticleRangeManager.inst().showMoveRangeSprites(enemyUnit);
+            const selectedUnit = TacticalUnitManager.inst().getUnitAt(x, y);
+            if (!selectedUnit) {
+                return;
+            };
+            if (selectedUnit.teamId === 0) {
+                console.log("Select ally: ", selectedUnit);
+                selectedUnit.controller.onSelect();
+                TacticleRangeManager.inst().showActionTileSprites(selectedUnit);
+                selectedUnit.actionPoints = 0;
+            } else {
+                console.log("Select enemy: ", selectedUnit);
+                TacticleRangeManager.inst().showActionTileSprites(selectedUnit);
             }
         }
         /**
          * Update player turn
          */
         updatePlayerTurn() {
-            const isAllPlayerFinished = this.allyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
+            const isAllPlayerFinished = TacticalUnitManager.inst().allyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
             if (isAllPlayerFinished) {
                 this.onPlayerTurnEnd();
             }
@@ -430,7 +417,7 @@ window.TBS = window.TBS || {};
          * On Player Turn End.
          */
         onPlayerTurnEnd() {
-            this.allyUnits.forEach((unit) => {
+            TacticalUnitManager.inst().allyUnits.forEach((unit) => {
                 unit.onTurnEnd();
             });
 
@@ -449,14 +436,14 @@ window.TBS = window.TBS || {};
             this.currentPhase = 'updateTurn';
 
             setTimeout(() => {
-                this.enemyUnits.forEach(u => u.actionPoints = 0);
+                TacticalUnitManager.inst().enemyUnits.forEach(u => u.actionPoints = 0);
             }, 1000);
         }
         /**
          * Update Enemy Turn
          */
         updateEnemyTurn() {
-            const isAllPlayerFinished = this.enemyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
+            const isAllPlayerFinished = TacticalUnitManager.inst().enemyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
             if (isAllPlayerFinished) {
                 this.onEnemyTurnEnd();
             }
@@ -465,7 +452,7 @@ window.TBS = window.TBS || {};
          * On Enemy Turn End.
          */
         onEnemyTurnEnd() {
-            this.enemyUnits.forEach((unit) => {
+            TacticalUnitManager.inst().enemyUnits.forEach((unit) => {
                 unit.onTurnEnd();
             });
 
@@ -478,19 +465,9 @@ window.TBS = window.TBS || {};
          */
         isBusy() {
             const isPhaseTextShowing = this.spritePhaseText.bitmap != null;
-            const isUnitBusy = this.isUnitBusy();
+            const isUnitBusy = TacticalUnitManager.inst().isUnitBusy();
             return isPhaseTextShowing || isUnitBusy;
         }
-        /**
-         * Check if an unit on both team is busy
-         * @returns {boolean}
-         */
-        isUnitBusy() {
-            const isAllyBusy = this.allyUnits.some(ally => ally.isBusy());
-            const isEnemyBusy = this.enemyUnits.some(enemy => enemy.isBusy());
-            return isAllyBusy || isEnemyBusy;
-        }
-    
     }
     /**
      * Get Instance
