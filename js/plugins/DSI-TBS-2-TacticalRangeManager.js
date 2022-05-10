@@ -50,15 +50,6 @@ class TacticalRangeManager {
         if (filterFunction) {
             attackTiles = attackTiles.filter(filterFunction);
         }
-        // const unitTeamMembers = TacticalUnitManager.inst().getUnitTeam(unit);
-        // attackTiles = attackTiles.filter(tile => {
-        //     const hasAlliedUnit = unitTeamMembers.some(unit => tile.x == unit.position.x && tile.y == unit.position.y);
-        //     if (hasAlliedUnit) {
-        //         return false;
-        //     }
-        //     return true;
-        // });
-
         return attackTiles;
     }
     /**
@@ -201,6 +192,41 @@ class TacticalRangeManager {
             GameUtils.removeSpriteFromTilemap(sprite);
         });
         this.tileSprites = this.tileSprites.filter(sprite => sprite.unit != unit);
+    }
+    /**
+     * Calculate Action Target Position By Range
+     * @param {TacticalUnit} unit 
+     * @param {TacticalRange} range 
+     * @returns {FLOOD_FILL_TILE[]}
+     */
+    calculateActionTargetPositionsByRange(unit, targetX, targetY, range) {
+        let affectPositions = [new FLOOD_FILL_TILE(targetX, targetY, false, 0)];
+        if (range.penerate && !range.diagonal) {
+
+            const curSignX = targetX - unit.position.x;
+            const curSignY = targetY - unit.position.y;
+
+            const attackTiles = TacticalRangeManager.inst().calculateActionTiles(targetX, targetY, range);
+            const lineTiles = attackTiles.filter(tile => {
+                if (tile.x == targetX && tile.y == targetY) return false;
+                const signX = tile.x - unit.position.x;
+                const signY = tile.y - unit.position.y;
+                if (tile.y == targetY && curSignX * signX > 0) {
+                    return true;
+                }
+                if (tile.x == targetX && curSignY * signY > 0) {
+                    return true;
+                }
+                return false;
+            });
+            affectPositions = affectPositions.concat(lineTiles);
+        }
+        if (range.aoe) {
+            let aoeTiles = TacticalRangeManager.inst().calculateAOETiles(targetX, targetY, range.aoe.range);
+            aoeTiles = aoeTiles.filter(tile => tile.x != targetX && tile.y != targetY);
+            affectPositions = affectPositions.concat(aoeTiles);
+        }
+        return affectPositions;
     }
 }
 

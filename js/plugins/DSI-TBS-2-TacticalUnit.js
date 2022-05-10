@@ -76,7 +76,7 @@ class TacticalUnit {
      * @param {number} y
      */
     attack(x, y) {
-
+        this.skill(this.attackSkillId(), x, y);
     }
     /**
      * Defend
@@ -85,13 +85,24 @@ class TacticalUnit {
 
     }
     /**
+     *     x
+     * x x 0 x x
+     *     x
+     */
+    /**
      * Use Skill
      * @param {number} skillId
      * @param {number} x
      * @param {number} y
      */
     skill(skillId, x, y) {
+        const skill = $dataSkills[skillId];
+        /** @type {TacticalRange} */
+        const range = skill.tbsSkill.range;
+        /** @type {FLOOD_FILL_TILE[]} */
+        const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
 
+        console.log({targetedTiles});
     }
     /**
      * Wait
