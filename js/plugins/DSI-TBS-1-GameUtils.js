@@ -135,6 +135,9 @@ GameUtils.parseEnemyData = function(lines) {
             if (line.match(/^mov:\s*(\d+)/i)) {
                 enemyData.mov = Number(RegExp.$1);
             }
+            if (line.match(/^atkSkill:\s*(\d+)/i)) {
+                enemyData.attackSkillId = Number(RegExp.$1);
+            }
         }
     })
     return enemyData.isValid() ? enemyData : null;

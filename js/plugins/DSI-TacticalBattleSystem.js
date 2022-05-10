@@ -97,6 +97,12 @@ window.TBS = window.TBS || {};
             this.actorListWindow.deactivate();
             GameUtils.addWindow(this.actorListWindow);
 
+            this.actorUnitCommandWindow = new Window_TacticalUnitCommand(new Rectangle(0, 0, 300, 200));
+            this.actorUnitCommandWindow.setHandler('cancel', this.onActorUnitCommandCancel.bind(this));
+            this.actorUnitCommandWindow.visible = false;
+            this.actorUnitCommandWindow.deactivate();
+            GameUtils.addWindow(this.actorUnitCommandWindow);
+
             this.spritePhaseText = new Sprite();
             this.spritePhaseText.anchor.x = 0.5;
             this.spritePhaseText.anchor.y = 0.5;
@@ -248,7 +254,6 @@ window.TBS = window.TBS || {};
 
                         const character = new Game_Character();
                         character.setImage(actor.characterName(), actor.characterIndex());
-                        character.setDirection(direction);
                         character.locate(cursorX, cursorY);
                         const sprite = new Sprite_Character(character);
                         // Init Ally Unit
@@ -395,14 +400,26 @@ window.TBS = window.TBS || {};
                 return;
             };
             if (selectedUnit.teamId === 0) {
-                console.log("Select ally: ", selectedUnit);
-                selectedUnit.controller.onSelect();
-                TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
-                selectedUnit.actionPoints = 0;
+                // console.log("Select ally: ", selectedUnit);
+                // selectedUnit.controller.onSelect();
+                // TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
+                // selectedUnit.actionPoints = 0;
+                this.actorUnitCommandWindow.setUnit(selectedUnit);
+                this.actorUnitCommandWindow.visible = true;
+                this.actorUnitCommandWindow.activate();
+                
+                this.cursor.deactivate();
             } else {
                 console.log("Select enemy: ", selectedUnit);
                 TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
             }
+        }
+        /**
+         * On Actor Unit Command Cancel.
+         */
+        onActorUnitCommandCancel() {
+            this.actorUnitCommandWindow.visible = false;
+            this.cursor.setOnOKCallback(this.cursorOnPlayerTurn.bind(this));
         }
         /**
          * Update player turn

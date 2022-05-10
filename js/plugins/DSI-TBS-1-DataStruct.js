@@ -3,6 +3,7 @@ class TBS_EnemyData {
     constructor() {
         this.enemyId = 0;
         this.mov = 0;
+        this.attackSkillId = 0;
     }
     /**
      * Is valid data

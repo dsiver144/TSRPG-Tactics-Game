@@ -18,7 +18,7 @@ class TacticalUnitManager {
         this.activeTeamId = 0;
     }
     /**
-     * Get All Unit of the same kind.
+     * Get All Unit of the same team.
      * @param {TacticalUnit} unit 
      */
     getUnitTeam(unit) {
@@ -26,7 +26,7 @@ class TacticalUnitManager {
         return teamId === 0 ? this.allyUnits : this.enemyUnits;
     }
     /**
-     * 
+     * Get All Unit of the opposite team.
      * @param {TacticalUnit} unit 
      * @returns 
      */

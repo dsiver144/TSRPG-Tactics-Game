@@ -72,8 +72,10 @@ class TacticalUnit {
     }
     /**
      * Attack
+     * @param {number} x
+     * @param {number} y
      */
-    attack() {
+    attack(x, y) {
 
     }
     /**
@@ -84,9 +86,11 @@ class TacticalUnit {
     }
     /**
      * Use Skill
-     * @param {number} skillId 
+     * @param {number} skillId
+     * @param {number} x
+     * @param {number} y
      */
-    skill(skillId) {
+    skill(skillId, x, y) {
 
     }
     /**
@@ -105,10 +109,47 @@ class TacticalUnit {
         this.moveSprite(x, y);
     }
     /**
+     * On knockback
+     */
+    knockback() {
+
+    }
+    /**
+     * On Fall
+     */
+    fall() {
+
+    }
+    /**
+     * Can Move To
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {boolean}
+     */
+    canMoveTo(x, y) {
+        return this.movableTiles.some(tile => tile.x == x && tile.y == y);
+    }
+    /**
+     * Can Use Action At
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {boolean}
+     */
+    canUseActionAt(x, y) {
+        return this.actionTiles.some(tile => tile.x == x && tile.y == y);
+    }
+    /**
      * Unit MOV
      * @returns {number}
      */
     moveRange() {
+        return 0;
+    }
+    /**
+     * Attack skill id
+     * @returns {number}
+     */
+    attackSkillId() {
         return 0;
     }
     /**
@@ -131,7 +172,7 @@ class TacticalUnit {
      * @returns {boolean}
      */
     isMoving() {
-        return this.battlerSprite && this.battlerSprite._character.hasPath();
+        return this.battlerSprite && this.battlerSprite._character.isMoving();
     }
     /**
      * Refill action points
@@ -173,6 +214,7 @@ class TacticalUnit {
      */
     setFaceDirection(direction) {
         this.faceDirection = direction;
+        this.getCharacter().setDirection(direction);
     }
     /**
      * Get Face Direction
@@ -189,18 +231,6 @@ class TacticalUnit {
         return this.actionPoints == 0;
     }
     /**
-     * On knockback
-     */
-    knockback() {
-
-    }
-    /**
-     * On Fall
-     */
-    fall() {
-
-    }
-    /**
      * Calculate Turn Start State
      */
     calculateTurnStartState() {
@@ -211,6 +241,13 @@ class TacticalUnit {
      */
     calculateTurnEndState() {
 
+    }
+    /**
+     * Get Character
+     * @returns {Game_Character}
+     */
+    getCharacter() {
+        return this.battlerSprite ? this.battlerSprite._character : null;
     }
 }
 
@@ -235,7 +272,17 @@ class Tactical_EnemyUnit extends TacticalUnit {
      * @returns {number}
      */
     attackRange() {
-        return 1;
+        /**
+         * @type {TacticalRange}
+         */
+        const range = $dataSkills[this.attackSkillId()].tbsSkill.range;
+        return range.max;
+    }
+    /**
+     * Attack skill id
+     */
+    attackSkillId() {
+        return this.battler.enemy().tbsEnemy.attackSkillId;
     }
 }
 
@@ -260,6 +307,16 @@ class Tactical_AllyUnit extends TacticalUnit {
      * @returns {number}
      */
     attackRange() {
-        return 1;
+        /**
+         * @type {TacticalRange}
+         */
+        const range = $dataSkills[this.attackSkillId()].tbsSkill.range;
+        return range.max;
+    }
+    /**
+     * Attack skill id
+     */
+     attackSkillId() {
+        return this.battler.weapons()[0].tbsWeapon.skillId;
     }
 }

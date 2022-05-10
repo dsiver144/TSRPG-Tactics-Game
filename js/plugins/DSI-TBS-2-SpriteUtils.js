@@ -106,6 +106,10 @@ class Sprite_StaticRange extends Sprite_StaticMapObject {
      constructor(position, bitmapName = 'BlueSquare') {
         super(position);
         this.bitmap = ImageManager.loadTBS(bitmapName);
+        /**
+         * @type {TacticalUnit}
+         */
+        this.unit = null;
     }
     /**
      * Screen Z

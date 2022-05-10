@@ -3,8 +3,8 @@ class TacticalRangeManager {
      * This class manage the range related stuff.
      */
 
-     constructor() {
-
+    constructor() {
+        this.tileSprites = [];
     }
     /**
      * Calculate move ranges
@@ -141,8 +141,9 @@ class TacticalRangeManager {
         // Calculate and show moveable tiles
         const unitTeamMembers = TacticalUnitManager.inst().getUnitTeam(unit);
         let movableTiles = this.calculateMovableTiles(unit.position.x, unit.position.y, unit.moveRange());
+        unit.movableTiles = movableTiles;
         let attackTiles = this.calculateAttackTilesFromMoveableTiles(unit.position.x, unit.position.y, unit.attackRange(), movableTiles);
-        let outerTiles = this.findOuterTiles(unit.position.x, unit.position.y, attackTiles.concat(movableTiles));
+        // let outerTiles = this.findOuterTiles(unit.position.x, unit.position.y, attackTiles.concat(movableTiles));
         attackTiles = attackTiles.filter(tile => {
             const hasAlliedUnit = unitTeamMembers.some(unit => tile.x == unit.position.x && tile.y == unit.position.y);
             if (hasAlliedUnit) {
@@ -155,31 +156,51 @@ class TacticalRangeManager {
             const {x, y} = rangeTile;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), false ? "RedSquare" : "BlueSquare");
             GameUtils.addSpriteToTilemap(rangeSprite);
+            
+            rangeSprite.unit = unit;
+            this.tileSprites.push(rangeSprite);
         });
         attackTiles.forEach(rangeTile => {
             const {x, y} = rangeTile;
             // if (rangeTile.outer) return;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "RedSquare" : "BlueSquare");
             GameUtils.addSpriteToTilemap(rangeSprite);
+
+            rangeSprite.unit = unit;
+            this.tileSprites.push(rangeSprite);
         });
-        outerTiles.forEach(rangeTile => {
-            const {x, y} = rangeTile;
-            // if (rangeTile.outer) return;
-            const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "GreenSquare" : "BlueSquare");
-            GameUtils.addSpriteToTilemap(rangeSprite);
-        });
+        // outerTiles.forEach(rangeTile => {
+        //     const {x, y} = rangeTile;
+        //     // if (rangeTile.outer) return;
+        //     const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "GreenSquare" : "BlueSquare");
+        //     GameUtils.addSpriteToTilemap(rangeSprite);
+        // });
     }
     /**
      * Show Action Range Sprites
      * @param {TacticalUnit} unit 
+     * @param {number} skillId
      */
-    showActionTileSprites(unit) {
-        const actionTiles = this.calculateActionTiles(unit.position.x, unit.position.y, $dataSkills[4 + Math.randomInt(4)].tbsSkill.range);
+    showActionTileSprites(unit, skillId) {
+        const skill = $dataSkills[skillId];
+        const actionTiles = this.calculateActionTiles(unit.position.x, unit.position.y, skill.tbsSkill.range);
+        unit.actionTiles = actionTiles;
         actionTiles.forEach(tile => {
             const {x, y} = tile;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "RedSquare" : "BlueSquare");
             GameUtils.addSpriteToTilemap(rangeSprite);
-        })
+        });
+    }
+    /**
+     * Hide Move Tile Sprites
+     * @param {TacticalUnit} unit 
+     */
+    hideTileSprites(unit) {
+        const tileSpritesOfUnit = this.tileSprites.filter(sprite => sprite.unit == unit);
+        tileSpritesOfUnit.forEach(sprite => {
+            GameUtils.removeSpriteFromTilemap(sprite);
+        });
+        this.tileSprites = this.tileSprites.filter(sprite => sprite.unit != unit);
     }
 }
 
