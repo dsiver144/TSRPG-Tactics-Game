@@ -407,12 +407,16 @@ window.TBS = window.TBS || {};
                 this.actorUnitCommandWindow.setUnit(selectedUnit);
                 this.actorUnitCommandWindow.visible = true;
                 this.actorUnitCommandWindow.activate();
+
+                
                 
                 this.cursor.deactivate();
             } else {
                 console.log("Select enemy: ", selectedUnit);
                 TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
             }
+
+            $gameTemp.requestAnimation([selectedUnit.getCharacter()], 5);
         }
         /**
          * On Actor Unit Command Cancel.
