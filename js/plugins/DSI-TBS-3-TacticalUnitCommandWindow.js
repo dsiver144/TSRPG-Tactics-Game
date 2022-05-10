@@ -67,6 +67,9 @@ class Window_TacticalUnitCommand extends Window_Command {
     onAttackCommand() {
         const unit = this.unit;
         const cursor = TacticalBattleSystem.inst().cursor;
+        cursor.activate();
+        this.visible = false;
+        
         TacticalRangeManager.inst().showActionTileSprites(unit, unit.attackSkillId());
         cursor.setOnOKCallback((x, y) => {
             if (!unit.canUseActionAt(x, y)) {

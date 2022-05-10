@@ -206,7 +206,7 @@ class TacticalRangeManager {
             const curSignX = targetX - unit.position.x;
             const curSignY = targetY - unit.position.y;
 
-            const attackTiles = TacticalRangeManager.inst().calculateActionTiles(targetX, targetY, range);
+            const attackTiles = TacticalRangeManager.inst().calculateActionTiles(unit.position.x, unit.position.y, range);
             const lineTiles = attackTiles.filter(tile => {
                 if (tile.x == targetX && tile.y == targetY) return false;
                 const signX = tile.x - unit.position.x;
