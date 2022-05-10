@@ -1,11 +1,11 @@
 class TacticalUnitManager {
     constructor() {
         /**
-         * @type {TacticleUnit[]}
+         * @type {TacticalUnit[]}
          */
         this.allyUnits = [];
         /**
-         * @type {TacticleUnit[]}
+         * @type {TacticalUnit[]}
          */
         this.enemyUnits = [];
     }
@@ -24,6 +24,15 @@ class TacticalUnitManager {
     getUnitTeam(unit) {
         const teamId = unit.teamId;
         return teamId === 0 ? this.allyUnits : this.enemyUnits;
+    }
+    /**
+     * 
+     * @param {TacticalUnit} unit 
+     * @returns 
+     */
+    getOppositeTeam(unit) {
+        const teamId = unit.teamId;
+        return teamId === 0 ? this.enemyUnits : this.allyUnits;
     }
     /**
      * Get unit at

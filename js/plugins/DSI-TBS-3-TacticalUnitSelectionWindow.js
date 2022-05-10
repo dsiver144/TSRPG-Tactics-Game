@@ -1,4 +1,4 @@
-class Window_TacticleUnitSelectionList extends Window_Command {
+class Window_TacticalUnitSelectionList extends Window_Command {
 
     constructor(rect) {
         super(rect);

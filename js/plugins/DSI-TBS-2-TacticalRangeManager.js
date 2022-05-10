@@ -1,4 +1,4 @@
-class TacticleRangeManager {
+class TacticalRangeManager {
     /**
      * This class manage the range related stuff.
      */
@@ -135,7 +135,7 @@ class TacticleRangeManager {
     }
     /**
      * Show Move Range At Unit
-     * @param {TacticleUnit} unit 
+     * @param {TacticalUnit} unit 
      */
     showMoveTileSprites(unit) {
         // Calculate and show moveable tiles
@@ -185,12 +185,12 @@ class TacticleRangeManager {
 
 /**
  * Get Instance
- * @returns {TacticleRangeManager}
+ * @returns {TacticalRangeManager}
  */
- TacticleRangeManager.inst = function() {
-    if (TacticleRangeManager.instance) {
-        return TacticleRangeManager.instance;
+ TacticalRangeManager.inst = function() {
+    if (TacticalRangeManager.instance) {
+        return TacticalRangeManager.instance;
     }
-    TacticleRangeManager.instance = new TacticleRangeManager();
-    return TacticleRangeManager.instance;
+    TacticalRangeManager.instance = new TacticalRangeManager();
+    return TacticalRangeManager.instance;
 }

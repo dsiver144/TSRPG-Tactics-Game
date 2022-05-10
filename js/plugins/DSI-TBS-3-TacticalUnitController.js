@@ -1,7 +1,7 @@
-class TacticleUnitController {
+class TacticalUnitController {
     /**
-     * TacticleUnitController
-     * @param {TacticleUnit} unit 
+     * TacticalUnitController
+     * @param {TacticalUnit} unit 
      */
     constructor(unit) {
         this.unit = unit;
@@ -12,10 +12,10 @@ class TacticleUnitController {
     }
 }
 
-class TacticalPlayerController extends TacticleUnitController {
+class TacticalPlayerController extends TacticalUnitController {
     /**
-     * TacticleUnitController
-     * @param {TacticleUnit} unit 
+     * TacticalPlayerController
+     * @param {TacticalUnit} unit 
      */
     constructor(unit) {
         super(unit)
@@ -29,18 +29,19 @@ class TacticalPlayerController extends TacticleUnitController {
     }
 }
 
-class TacticalBotController extends TacticleUnitController {
+class TacticalBotController extends TacticalUnitController {
     /**
-     * TacticleUnitController
-     * @param {TacticleUnit} unit 
+     * TacticalBotController
+     * @param {TacticalUnit} unit 
      */
     constructor(unit) {
-        super(unit)
+        super(unit);
     }
     /**
      * On Select
      */
     onSelect() {
         console.log("Bot select unit", unit);
+        // const 
     }
 }

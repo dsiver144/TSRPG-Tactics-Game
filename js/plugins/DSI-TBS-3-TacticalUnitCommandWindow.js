@@ -1,7 +1,7 @@
-class Window_TacticleUnitCommand extends Window_Command {
+class Window_TacticalUnitCommand extends Window_Command {
     /**
      * Set Unit
-     * @param {TacticleUnit} unit 
+     * @param {TacticalUnit} unit 
      */
     setUnit(unit) {
         this.unit = unit;

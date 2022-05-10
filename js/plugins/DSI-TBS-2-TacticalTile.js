@@ -1,4 +1,4 @@
-class TacticleTile {
+class TacticalTile {
     constructor() {
         
     }

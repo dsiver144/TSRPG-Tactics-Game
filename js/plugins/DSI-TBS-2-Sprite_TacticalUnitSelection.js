@@ -1,4 +1,4 @@
-class Sprite_TacticleUnitSelection extends Sprite_Character {
+class Sprite_TacticalUnitSelection extends Sprite_Character {
     constructor() {
         var character = new Game_CharacterBase();
         character.setImage("0", 0);

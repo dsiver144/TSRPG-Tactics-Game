@@ -1,4 +1,4 @@
-class TacticleUnit {
+class TacticalUnit {
 
     constructor(teamId, position) {
         /**
@@ -18,7 +18,7 @@ class TacticleUnit {
          */
         this.faceDirection = 0;
         /**
-         * @type {TacticleUnitController}
+         * @type {TacticalUnitController}
          */
         this.controller = null;
         /**
@@ -40,7 +40,7 @@ class TacticleUnit {
     }
     /**
      * Set Controller
-     * @param {TacticleUnitController} controller 
+     * @param {TacticalUnitController} controller 
      */
     setController(controller) {
         this.controller = controller;
@@ -214,7 +214,7 @@ class TacticleUnit {
     }
 }
 
-class Tacticle_EnemyUnit extends TacticleUnit {
+class Tactical_EnemyUnit extends TacticalUnit {
     /**
      * Tacticle_EnemyUnit
      * @param {Position} position 
@@ -239,7 +239,7 @@ class Tacticle_EnemyUnit extends TacticleUnit {
     }
 }
 
-class Tacticle_AllyUnit extends TacticleUnit {
+class Tactical_AllyUnit extends TacticalUnit {
     /**
      * Tacticle_EnemyUnit
      * @param {Position} position 

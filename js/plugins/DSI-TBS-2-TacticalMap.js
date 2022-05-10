@@ -1,4 +1,4 @@
-class TacticleMap {
+class TacticalMap {
     constructor() {
         
     }

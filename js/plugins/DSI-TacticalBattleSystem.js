@@ -87,11 +87,11 @@ window.TBS = window.TBS || {};
              */
             this.activeTeamId = 0;
             /**
-             * @type {TacticleCursor}
+             * @type {TacticalCursor}
              */
-            this.cursor = new TacticleCursor();
+            this.cursor = new TacticalCursor();
 
-            this.actorListWindow = new Window_TacticleUnitSelectionList(new Rectangle(0, 0, 300, 200));
+            this.actorListWindow = new Window_TacticalUnitSelectionList(new Rectangle(0, 0, 300, 200));
             this.actorListWindow.setHandler('cancel', this.onActorListCancel.bind(this));
             this.actorListWindow.visible = false;
             this.actorListWindow.deactivate();
@@ -105,7 +105,7 @@ window.TBS = window.TBS || {};
             GameUtils.addSprite(this.spritePhaseText);
             this.spritePhaseText.opacity = 0;
 
-            this.actorPreviewSprite = new Sprite_TacticleUnitSelection();
+            this.actorPreviewSprite = new Sprite_TacticalUnitSelection();
             GameUtils.addSpriteToTilemap(this.actorPreviewSprite);
             this.actorPreviewSprite.visible = false;
 
@@ -252,7 +252,7 @@ window.TBS = window.TBS || {};
                         character.locate(cursorX, cursorY);
                         const sprite = new Sprite_Character(character);
                         // Init Ally Unit
-                        const allyUnit = new Tacticle_AllyUnit(new Position(cursorX, cursorY));
+                        const allyUnit = new Tactical_AllyUnit(new Position(cursorX, cursorY));
                         allyUnit.setBattler(actor);
                         allyUnit.setSprite(sprite);
                         allyUnit.setFaceDirection(direction);
@@ -318,7 +318,7 @@ window.TBS = window.TBS || {};
                 const { enemyId } = event.enemyData;
                 const enemy = new Game_Enemy(enemyId, event.x, event.y);
                 const enemySprite = GameUtils.getEventSprite(event.eventId());
-                const enemyUnit = new Tacticle_EnemyUnit(new Position(event.x, event.y));
+                const enemyUnit = new Tactical_EnemyUnit(new Position(event.x, event.y));
                 enemyUnit.setBattler(enemy);
                 enemyUnit.setSprite(enemySprite);
                 enemyUnit.setFaceDirection(event.direction());
@@ -397,11 +397,11 @@ window.TBS = window.TBS || {};
             if (selectedUnit.teamId === 0) {
                 console.log("Select ally: ", selectedUnit);
                 selectedUnit.controller.onSelect();
-                TacticleRangeManager.inst().showMoveTileSprites(selectedUnit);
+                TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
                 selectedUnit.actionPoints = 0;
             } else {
                 console.log("Select enemy: ", selectedUnit);
-                TacticleRangeManager.inst().showMoveTileSprites(selectedUnit);
+                TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
             }
         }
         /**

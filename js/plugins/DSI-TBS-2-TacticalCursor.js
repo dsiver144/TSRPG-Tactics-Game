@@ -9,7 +9,7 @@ const POSITION_OFFSET_BY_DIRECTION = {
     8: [0, -1],
 }
 
-class TacticleCursor {
+class TacticalCursor {
 
     constructor() {
         /**
@@ -38,7 +38,7 @@ class TacticleCursor {
      * Create cursor sprite
      */
     createCursorSprite() {
-        this.sprite = new Sprite_TacticleCursor(this);
+        this.sprite = new Sprite_TacticalCursor(this);
         this.sprite.visible = false;
         GameUtils.addSpriteToTilemap(this.sprite);
     }
@@ -214,15 +214,15 @@ class TacticleCursor {
 
 }
 
-class Sprite_TacticleCursor extends Sprite_OnMapObject {
+class Sprite_TacticalCursor extends Sprite_OnMapObject {
     /**
      * Tacticle Cursor Sprite
-     * @param {TacticleCursor} cursor 
+     * @param {TacticalCursor} cursor 
      */
     constructor(cursor) {
         super();
         /**
-         * @type {TacticleCursor} - referent to current cursor.
+         * @type {TacticalCursor} - referent to current cursor.
          */
         this.cursor = cursor;
         this.bitmap = ImageManager.loadTBS('cursor');
