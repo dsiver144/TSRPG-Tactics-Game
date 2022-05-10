@@ -8,34 +8,37 @@ class TacticleRangeManager {
     }
     /**
      * Calculate move ranges
-     * @param {TacticleUnit} unit 
+     * @param {number} x
+     * @param {number} y
+     * @param {number} moveRange
      * @returns {FLOOD_FILL_TILE[]}
      */
-    calculateMovableTiles(unit) {
-        const movableTiles = GameUtils.floodFill(unit.position.x, unit.position.y, unit.moveRange(), (x, y) => {
+    calculateMovableTiles(startX, startY, moveRange) {
+        const movableTiles = GameUtils.floodFill(startX, startY, moveRange, (x, y) => {
             var passable = $gameMap.checkPassage(x, y, 0x0f);
             var hasUnit = TacticalUnitManager.inst().getUnitAt(x, y);
             var hasEvent = $gameMap.blockableEventsXy(x, y)[0];
             return !hasUnit && !hasEvent && passable;
         });
-        unit.movableTiles = movableTiles;
         return movableTiles;
     }
     /**
      * Calcuate attack range from move ranges
-     * @param {TacticalUnit} unit
+     * @param {number} x
+     * @param {number} y
+     * @param {number} attackRange
      * @param {FLOOD_FILL_TILE[]} moveableTiles 
+     * @param {(tile: FLOOD_FILL_TILE) => boolean} filterFunction 
      */
-    calculateAttackTileFromMoveableTiles(unit, moveableTiles) {
+    calculateAttackTilesFromMoveableTiles(startX, startY, attackRange, moveableTiles, filterFunction) {
         const visitedTiles = {};
         moveableTiles.forEach(tile => {
             visitedTiles[`${tile.x}-${tile.y}`] = true;
         })
-        
+        /** @type {FLOOD_FILL_TILE[]} */
         let attackTiles = [];
-        const attackRange = unit.attackRange();
-        moveableTiles.forEach(tile => {
-            if (tile.totalEdges >= 4) return;
+        const outerTiles = this.findOuterTiles(startX, startY, moveableTiles);
+        outerTiles.forEach(tile => {
             let result = GameUtils.floodFill(tile.x, tile.y, attackRange, (x, y) => {
                 return true;
             });
@@ -44,24 +47,29 @@ class TacticleRangeManager {
             attackTiles = attackTiles.concat(result);
         })
         // Filter out some tile that not match the condition.
-        const unitTeamMembers = TacticalUnitManager.inst().getUnitTeam(unit);
-        attackTiles = attackTiles.filter(tile => {
-            const hasAlliedUnit = unitTeamMembers.some(unit => tile.x == unit.position.x && tile.y == unit.position.y);
-            if (hasAlliedUnit) {
-                return false;
-            }
-            return true;
-        })
+        if (filterFunction) {
+            attackTiles = attackTiles.filter(filterFunction);
+        }
+        // const unitTeamMembers = TacticalUnitManager.inst().getUnitTeam(unit);
+        // attackTiles = attackTiles.filter(tile => {
+        //     const hasAlliedUnit = unitTeamMembers.some(unit => tile.x == unit.position.x && tile.y == unit.position.y);
+        //     if (hasAlliedUnit) {
+        //         return false;
+        //     }
+        //     return true;
+        // });
 
         return attackTiles;
     }
     /**
      * Calcuate Action Tiles
-     * @param {TacticalUnit} unit 
-     * @param {TacticleRange} range 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {TacticalRange} range 
      * @returns {FLOOD_FILL_TILE[]}
      */
-    calculateActionTiles(unit, range) {
+    calculateActionTiles(startX, startY, range) {
+        /** @type {FLOOD_FILL_TILE[]} */
         const result = [];
         for (var y = -range.max; y <= range.max; y++) {
             for (var x = -range.max; x <= range.max; x++) {
@@ -70,20 +78,20 @@ class TacticleRangeManager {
                     if (!range.diagonal && (x != 0 && y != 0)) {
                         continue;
                     }
-                    result.push(new FLOOD_FILL_TILE(unit.position.x + x, unit.position.y + y, false, dist));
+                    result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
                 }
             }
         }
-        unit.actionTiles = result;
         return result;
     }
     /**
-     * 
-     * @param {TacticalUnit} unit 
-     * @param {TacticleAOERange} aoeRange 
+     * Calculate AOE Tiles
+     * @param {number} x 
+     * @param {number} y 
+     * @param {TacticalAOERange} aoeRange 
      * @returns {FLOOD_FILL_TILE[]}
      */
-    calculateAOETiles(unit, aoeRange) {
+    calculateAOETiles(startX, startY, aoeRange) {
         const result = [];
         for (var y = -range.max; y <= range.max; y++) {
             for (var x = -range.max; x <= range.max; x++) {
@@ -91,37 +99,82 @@ class TacticleRangeManager {
                 if (aoeRange.shape === AOE_RANGE_SHAPE.DIAMOND && !(dist >= range.min && dist <= range.max)) {
                     continue;
                 }
-                result.push(new FLOOD_FILL_TILE(unit.position.x + x, unit.position.y + y, false, dist));
+                result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
             }
         }
+        return result;
+    }
+    /**
+     * Find outer tiles
+     * @param {FLOOD_FILL_TILE[]} tiles 
+     */
+    findOuterTiles(startX, startY, tiles) {
+        const map = {};
+        tiles.forEach(tile => {
+            map[`${tile.x}-${tile.y}`] = tile;
+        });
+        tiles.forEach(tile => {
+            const dist = Math.abs(tile.x - startX) + Math.abs(tile.y - startY);
+            if (dist <= 1) {
+                tile.totalEdges = 4;
+                return;
+            }
+            const {x, y} = tile;
+            const topTile = map[`${x}-${y - 1}`];
+            const bottomTile = map[`${x}-${y + 1}`];
+            const leftTile = map[`${x - 1}-${y}`];
+            const rightTile = map[`${x + 1}-${y}`];
+            let totalEdges = 0;
+            totalEdges += (topTile ? 1 : 0);
+            totalEdges += (bottomTile ? 1 : 0);
+            totalEdges += (leftTile ? 1 : 0);
+            totalEdges += (rightTile ? 1 : 0);
+            tile.totalEdges = totalEdges;
+        });
+        return tiles.filter(tile => tile.totalEdges < 4);
     }
     /**
      * Show Move Range At Unit
      * @param {TacticleUnit} unit 
      */
     showMoveTileSprites(unit) {
-        const movableTiles = this.calculateMovableTiles(unit);
+        // Calculate and show moveable tiles
+        const unitTeamMembers = TacticalUnitManager.inst().getUnitTeam(unit);
+        let movableTiles = this.calculateMovableTiles(unit.position.x, unit.position.y, unit.moveRange());
+        let attackTiles = this.calculateAttackTilesFromMoveableTiles(unit.position.x, unit.position.y, unit.attackRange(), movableTiles);
+        let outerTiles = this.findOuterTiles(unit.position.x, unit.position.y, attackTiles.concat(movableTiles));
+        attackTiles = attackTiles.filter(tile => {
+            const hasAlliedUnit = unitTeamMembers.some(unit => tile.x == unit.position.x && tile.y == unit.position.y);
+            if (hasAlliedUnit) {
+                return false;
+            }
+            return true;
+        });
+        // Show tiles
         movableTiles.forEach(rangeTile => {
             const {x, y} = rangeTile;
-            // if (rangeTile.outer) return;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), false ? "RedSquare" : "BlueSquare");
             GameUtils.addSpriteToTilemap(rangeSprite);
-        })
-        const attackTiles = this.calculateAttackTileFromMoveableTiles(unit, movableTiles);
+        });
         attackTiles.forEach(rangeTile => {
             const {x, y} = rangeTile;
             // if (rangeTile.outer) return;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "RedSquare" : "BlueSquare");
             GameUtils.addSpriteToTilemap(rangeSprite);
-        })
-        // Do stuff here.
+        });
+        outerTiles.forEach(rangeTile => {
+            const {x, y} = rangeTile;
+            // if (rangeTile.outer) return;
+            const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "GreenSquare" : "BlueSquare");
+            GameUtils.addSpriteToTilemap(rangeSprite);
+        });
     }
     /**
      * Show Action Range Sprites
      * @param {TacticalUnit} unit 
      */
     showActionTileSprites(unit) {
-        const actionTiles = this.calculateActionTiles(unit, $dataSkills[4 + Math.randomInt(4)].tbsSkill.range);
+        const actionTiles = this.calculateActionTiles(unit.position.x, unit.position.y, $dataSkills[4 + Math.randomInt(4)].tbsSkill.range);
         actionTiles.forEach(tile => {
             const {x, y} = tile;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "RedSquare" : "BlueSquare");

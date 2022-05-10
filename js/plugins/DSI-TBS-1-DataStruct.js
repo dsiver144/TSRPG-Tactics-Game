@@ -16,7 +16,7 @@ class TBS_EnemyData {
 class TBS_SkillData {
 
     constructor() {
-        this.range = new TacticleRange(0, 0);
+        this.range = new TacticalRange(0, 0);
     }
 
 }

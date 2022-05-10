@@ -13,7 +13,7 @@
  * @property {number} min   
  * @property {number} max   
  */
-class TacticleRange {
+class TacticalRange {
     /**
      * Setup Tacticle Range
      * @param {Number} min 
@@ -29,7 +29,7 @@ class TacticleRange {
     /**
      * Set Min
      * @param {Number} min 
-     * @returns {TacticleRange}
+     * @returns {TacticalRange}
      */
     setMin(min) {
         this.min = min;
@@ -45,7 +45,7 @@ class TacticleRange {
     /**
      * Set Max
      * @param {Number} max 
-     * @returns {TacticleRange}
+     * @returns {TacticalRange}
      */
     setMax(max) {
         this.max = max;
@@ -61,7 +61,7 @@ class TacticleRange {
     /**
      * Set Diagonal
      * @param {Boolean} bool 
-     * @returns {TacticleRange}
+     * @returns {TacticalRange}
      */
     setDiagonal(bool) {
         this.diagonal = bool;
@@ -77,7 +77,7 @@ class TacticleRange {
     /**
      * Set Penerate
      * @param {Boolean} bool 
-     * @returns {TacticleRange}
+     * @returns {TacticalRange}
      */
     setPenerate(bool) {
         this.penerate = bool;
@@ -97,21 +97,21 @@ class TacticleRange {
      * @returns 
      */
     setAOE(range, shape) {
-        this.aoe = new TacticleAOERange();
+        this.aoe = new TacticalAOERange();
         this.aoe.shape
         this.aoe.setRange(range).setShape(shape);
         return this;
     }
     /**
      * Get AOE Range
-     * @returns {TacticleAOERange}
+     * @returns {TacticalAOERange}
      */
     getAOE() {
         return this.aoe;
     }
 }
 
-class TacticleAOERange {
+class TacticalAOERange {
     /**
      * Tacticle AOE Range
      * @property {Number} range
@@ -124,7 +124,7 @@ class TacticleAOERange {
     /**
      * Set AOE Range.
      * @param {Number} range 
-     * @returns {TacticleAOERange}
+     * @returns {TacticalAOERange}
      */
     setRange(range) {
         this.range = range;
@@ -140,7 +140,7 @@ class TacticleAOERange {
     /**
      * Set AOE Shape
      * @param {AOE_RANGE_SHAPE} shape 
-     * @returns {TacticleAOERange}
+     * @returns {TacticalAOERange}
      */
     setShape(shape) {
         this.shape = shape;

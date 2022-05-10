@@ -61,7 +61,6 @@ GameUtils.floodFill = function(x, y, range, conditionFunction) {
     let originalX = x;
     let originalY = y;
     let originalRange = range;
-    let edgeCounter = {};
     // Recursive function to fill the array.
     function doFill(targetX, targetY, edges) {
         const nextTiles = [];
@@ -87,21 +86,6 @@ GameUtils.floodFill = function(x, y, range, conditionFunction) {
         })  
     }
     doFill(x, y, 1);
-    // Calculate edges
-    Object.values(result).forEach(tile => {
-        const {x, y} = tile;
-        const topTile = result[`${x}-${y - 1}`];
-        const bottomTile = result[`${x}-${y + 1}`];
-        const leftTile = result[`${x - 1}-${y}`];
-        const rightTile = result[`${x + 1}-${y}`];
-        let totalEdges = 0;
-        totalEdges += (topTile ? 1 : 0);
-        totalEdges += (bottomTile ? 1 : 0);
-        totalEdges += (leftTile ? 1 : 0);
-        totalEdges += (rightTile ? 1 : 0);
-        tile.totalEdges += totalEdges;
-    })
-
     return Object.values(result);
 }
 /**

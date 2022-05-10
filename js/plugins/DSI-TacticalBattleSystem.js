@@ -397,11 +397,11 @@ window.TBS = window.TBS || {};
             if (selectedUnit.teamId === 0) {
                 console.log("Select ally: ", selectedUnit);
                 selectedUnit.controller.onSelect();
-                TacticleRangeManager.inst().showActionTileSprites(selectedUnit);
+                TacticleRangeManager.inst().showMoveTileSprites(selectedUnit);
                 selectedUnit.actionPoints = 0;
             } else {
                 console.log("Select enemy: ", selectedUnit);
-                TacticleRangeManager.inst().showActionTileSprites(selectedUnit);
+                TacticleRangeManager.inst().showMoveTileSprites(selectedUnit);
             }
         }
         /**
