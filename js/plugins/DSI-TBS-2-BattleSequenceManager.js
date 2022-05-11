@@ -17,6 +17,8 @@ class TacticalSequenceManager {
      */
     runSequences(user, targets, sequences) {
         this.reset();
+        this.user = user;
+        this.targets = targets;
         eval(sequences);
         console.log("ACTIONS: ", this.actions);
         this.startNextAction();
@@ -41,6 +43,16 @@ class TacticalSequenceManager {
         const cursor = TacticalBattleSystem.inst().cursor;
         const action = new TacticalSequencePlayAnimActionOnCursor(cursor, this);
         action.setAnimId(animationId).setWait(waitForComplete);
+        this.actions.push(action);
+    }
+    /**
+     * Apply action.
+     * @param {TacticalUnit} targetUnit 
+     */
+    applyAction(targetUnit) {
+        const battleAction = this.user.currentAction();
+        const action = new TacticalSequenceApplyBattleAction(null, this);
+        action.setBattleAction(battleAction, targetUnit.battler);
         this.actions.push(action);
     }
     /**
@@ -172,62 +184,66 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
         this.animationId = id;
         return this;
     }
-    /**
-     * Set Animation Target
-     * @param {object} target 
-     */
+
     getTarget() {
         return this.subject.getCharacter();
     }
-    /**
-     * Start action
-     */
+
     onStart() {
         super.onStart();
         $gameTemp.requestAnimation([this.getTarget()], this.animationId);
     }
-    /**
-     * Check if this action is finish or not.
-     * @returns {boolean}
-     */
+
     isFinished() {
         return !this.getTarget().isAnimationPlaying();
     }
 }
 
 class TacticalSequencePlayAnimActionOnCursor extends TacticalSequencePlayAnimAction {
-    /**
-     * Get Target.
-     * @returns {object}
-     */
+
     getTarget() {
         return this.subject;
     }
 }
 
 class TacticalSequenceWaitAction extends TacticalSequenceAction {
-    /**
-     * Set wait frame
-     */
+
     setWaitFrames(frames) {
         this.waitFrames = frames;
         this.setWait(true);
     }
-    /**
-     * Update action
-     */
+
     updateAction() {
         if (this.waitFrames > 0) {
             this.waitFrames -= 1;
         }
         super.updateAction();
     }
-    /**
-     * Check if this action is finish or not.
-     * @returns {boolean}
-     */
+
     isFinished() {
         return this.waitFrames === 0;
+    }
+}
+
+class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
+    /**
+     * Set Battle Action
+     * @param {Game_Action} action 
+     * @param {Game_Battler} target 
+     */
+    setBattleAction(action, target) {
+        this.battleAction = action;
+        this.target = target;
+    }
+
+    onStart() {
+        super.onStart();
+        this.battleAction.apply(this.target);
+        console.log("> Appled Action to Target: ", this.target.result());
+    }
+    
+    isFinished() {
+        return true;
     }
 }
 

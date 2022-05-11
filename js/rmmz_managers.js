@@ -2746,6 +2746,8 @@ BattleManager.startAction = function() {
     this._logWindow.startAction(subject, action, targets);
 };
 
+
+
 BattleManager.updateAction = function() {
     const target = this._targets.shift();
     if (target) {

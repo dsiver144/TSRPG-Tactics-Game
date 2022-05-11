@@ -83,17 +83,14 @@ class TacticalUnit {
 
     }
     /**
-     *     x
-     * x x 0 x x
-     *     x
-     */
-    /**
      * Use Skill
      * @param {number} skillId
      * @param {number} x
      * @param {number} y
      */
     skill(skillId, x, y) {
+        this.turnTowardPoint(x, y);
+
         const skill = $dataSkills[skillId];
         /** @type {TacticalRange} */
         const sequences = skill.tbsSkill.getSequences();
@@ -112,7 +109,36 @@ class TacticalUnit {
             alert("Action sequences not found, please config!");
             return;
         }
+        this.forceAction(skillId);
+        const action = this.currentAction();
+        targets.forEach(unit => {
+            action.apply(unit.battler);
+            console.log("RESULT: ", unit.battler.result());
+        })
+        console.log(targets.map(u => u.battler));
         TacticalSequenceManager.inst().runSequences(this, targets, sequences);
+    }
+    /**
+     * Force action
+     * @param {number} skillId 
+     */
+    forceAction(skillId) {
+        this.battler.forceAction(skillId, 0);
+        this.useItem(this.currentAction().item());
+    }
+    /**
+     * Get current action.
+     * @returns {Game_Action}
+     */
+    currentAction() {
+        return this.battler.currentAction();
+    }
+    /**
+     * Use item
+     * @param {object} item 
+     */
+    useItem(item) {
+        this.battler.useItem(item);
     }
     /**
      * Wait
@@ -243,6 +269,20 @@ class TacticalUnit {
     setFaceDirection(direction) {
         this.faceDirection = direction;
         this.getCharacter().setDirection(direction);
+    }
+    /**
+     * Turn toward point
+     * @param {number} x 
+     * @param {number} y 
+     */
+    turnTowardPoint(x, y) {
+        const sx = this.position.x - x;
+        const sy = this.position.y - y;
+        if (Math.abs(sx) > Math.abs(sy)) {
+            this.setFaceDirection(sx > 0 ? 4 : 6);
+        } else if (sy !== 0) {
+            this.setFaceDirection(sy > 0 ? 8 : 2);
+        }
     }
     /**
      * Get Face Direction

@@ -409,23 +409,16 @@ window.TBS = window.TBS || {};
                 return;
             };
             if (selectedUnit.teamId === 0) {
-                // console.log("Select ally: ", selectedUnit);
-                // selectedUnit.controller.onSelect();
-                // TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
-                // selectedUnit.actionPoints = 0;
+
                 this.actorUnitCommandWindow.setUnit(selectedUnit);
                 this.actorUnitCommandWindow.visible = true;
                 this.actorUnitCommandWindow.activate();
 
-                
-                
                 this.cursor.deactivate();
             } else {
                 console.log("Select enemy: ", selectedUnit);
                 TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
             }
-
-            $gameTemp.requestAnimation([selectedUnit.getCharacter()], 1);
         }
         /**
          * On Actor Unit Command Cancel.
