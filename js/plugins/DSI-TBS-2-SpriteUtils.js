@@ -154,3 +154,13 @@ class Sprite_DynamicRange extends Sprite {
         this.z = 0;
     }
 }
+
+var DSI_TBS_2_TacticalCursor_Spriteset_Map_findTargetSprite = Spriteset_Map.prototype.findTargetSprite;
+Spriteset_Map.prototype.findTargetSprite = function(target) {
+    switch(target.constructor) {
+        case TacticalCursor:
+            return TacticalBattleSystem.inst().cursor.sprite;
+    }
+	const result = DSI_TBS_2_TacticalCursor_Spriteset_Map_findTargetSprite.call(this, target);
+    return result;
+};

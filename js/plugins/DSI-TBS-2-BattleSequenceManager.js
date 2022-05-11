@@ -33,6 +33,17 @@ class TacticalSequenceManager {
         this.actions.push(action);
     }
     /**
+     * Play Animation On Cursor
+     * @param {number} animationId 
+     * @param {boolean} waitForComplete
+     */
+    playAnimOnCursor(animationId, waitForComplete = true) {
+        const cursor = TacticalBattleSystem.inst().cursor;
+        const action = new TacticalSequencePlayAnimActionOnCursor(cursor, this);
+        action.setAnimId(animationId).setWait(waitForComplete);
+        this.actions.push(action);
+    }
+    /**
      * Wait Action
      * @param {number} frames 
      */
@@ -47,7 +58,7 @@ class TacticalSequenceManager {
     startNextAction() {
         this.actionIndex += 1;
         const action = this.actions[this.actionIndex];
-        action && action.start();
+        action && action.onStart();
     }
     /**
      * Update sequences.
@@ -80,10 +91,13 @@ class TacticalSequenceAction {
      * @param {TacticalSequenceManager} manager 
      */
     constructor(subject, manager) {
+        const cursor = TacticalBattleSystem.inst().cursor;
+
         this.manager = manager;
         this.subject = subject;
 
         this.isNextActionStarted = false;
+        this.isFinishAction = false;
     }
     /**
      * Set wait.
@@ -97,20 +111,19 @@ class TacticalSequenceAction {
     /**
      * Start action
      */
-    start() {
+    onStart() {
 
     }
     /**
      * Finish Action
      */
-    finish() {
+    onFinish() {
         console.log("FINISH ", this);
     }
     /**
      * Start Next Action
      */
     startNextAction() {
-        this.finish();
         this.manager.startNextAction();
         this.isNextActionStarted = true;
     }
@@ -118,6 +131,10 @@ class TacticalSequenceAction {
      * Update
      */
     update() {
+        if (this.isFinished() && !this.isFinishAction) {
+            this.onFinish();
+            this.isFinishAction = true;
+        }
         if (this.isNextActionStarted) return;
         if (this.waiting) {
             if (this.isFinished()) {
@@ -146,10 +163,17 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
         return this;
     }
     /**
+     * Set Animation Target
+     * @param {object} target 
+     */
+    getTarget() {
+        return this.subject.getCharacter();
+    }
+    /**
      * Start action
      */
-    start() {
-        $gameTemp.requestAnimation([this.subject.getCharacter()], this.animationId);
+    onStart() {
+        $gameTemp.requestAnimation([this.getTarget()], this.animationId);
     }
     /**
      * Check if this action is finish or not.
@@ -157,6 +181,16 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
      */
     isFinished() {
         return !this.subject.getCharacter().isAnimationPlaying();
+    }
+}
+
+class TacticalSequencePlayAnimActionOnCursor extends TacticalSequencePlayAnimAction {
+    /**
+     * Get Target.
+     * @returns {object}
+     */
+    getTarget() {
+        return this.subject;
     }
 }
 
