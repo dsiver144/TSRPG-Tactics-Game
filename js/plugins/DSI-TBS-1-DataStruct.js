@@ -15,17 +15,33 @@ class TBS_EnemyData {
 }
 
 class TBS_SkillData {
-
+    /**
+     * TBS_SkillData
+     */
     constructor() {
         this.range = new TacticalRange(0, 0);
+        this.targets = [];
         /** @private */
         this.sequences = null;
     }
-
+    /**
+     * Set Targets
+     * @param {('ally' | 'enemy')[]} targets 
+     */
+    setTargets(targets) {
+        this.targets = targets;
+    }
+    /**
+     * Set Sequences
+     * @param {string} str 
+     */
     setSequences(str) {
         this.sequences = str;
     }
-
+    /**
+     * Get sequences
+     * @returns {string}
+     */
     getSequences() {
         return this.sequences;
     }
