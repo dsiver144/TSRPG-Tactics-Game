@@ -9,6 +9,7 @@ var $plugins =
 {"name":"DSI-TBS-1-DataStruct","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-1-GameUtils","status":true,"description":"(v1.0) A custom plugin by dsiver144","parameters":{"testParam:number":"144"}},
 {"name":"DSI-TBS-1-BattleUnitManager","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-2-BattleSequenceManager","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-SpriteUtils","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-TacticalTile","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-TacticalUnit","status":true,"description":"","parameters":{}},

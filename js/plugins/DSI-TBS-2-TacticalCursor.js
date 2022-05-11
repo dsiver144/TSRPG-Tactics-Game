@@ -137,8 +137,12 @@ class TacticalCursor {
         if (TacticalBattleSystem.inst().isBusy()) return;
         
         if (Input.dir4 != 0) {
-            const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
-            this.moveByInput(x, y);
+            if (this.onDirectionalCallback) {
+                this.onDirectionalCallback(Input.dir4);
+            } else {
+                const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
+                this.moveByInput(x, y);
+            }
         }
         if (TouchInput.isTriggered()) {
             const x = $gameMap.canvasToMapX(TouchInput.x);
@@ -197,11 +201,19 @@ class TacticalCursor {
         this.onCancelCallback = callback;
     }
     /**
+     * Set Directional Callback
+     * @param {(direction: number) => void} callback 
+     */
+    setDirectionalCallback(callback) {
+        this.onDirectionalCallback = callback;
+    }
+    /**
      * Clear all callbacks
      */
     clearAllCallbacks() {
         this.onOKCallback = null;
         this.onCancelCallback = null;
+        this.onDirectionalCallback = null;
     }
     /**
      * Check if cursor is inside valid action positions.

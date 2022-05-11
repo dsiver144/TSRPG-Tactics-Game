@@ -180,6 +180,9 @@ class TacticalRangeManager {
             const {x, y} = tile;
             const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "RedSquare" : "BlueSquare");
             GameUtils.addSpriteToTilemap(rangeSprite);
+            
+            rangeSprite.unit = unit;
+            this.tileSprites.push(rangeSprite);
         });
     }
     /**

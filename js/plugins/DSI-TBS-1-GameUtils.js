@@ -163,6 +163,7 @@ GameUtils.setupTBSSkills = function() {
         if (!skill) return;
         const lines = skill.note.split(/[\r\n]+/i);
         const skillData = GameUtils.parseSkillData(lines);
+        skillData && skillData.setSequences(this.parseSkillSequences(lines));
         skill.tbsSkill = skillData;
     })
 }
@@ -212,6 +213,30 @@ GameUtils.setupTBSWeapons = function() {
         }
     })
     return skillData;
+}
+/**
+ * Parse Skill Data From Note
+ * @param {string[]} lines 
+ * @returns {string}
+ */
+ GameUtils.parseSkillSequences = function(lines) {
+    let sequences = null;
+    let readNotetag = false;
+    lines.forEach(line => {
+        if (line.match(/<tbs sequences>/i)) {
+            readNotetag = true;
+            sequences = ""
+            return;
+        }
+        if (line.match(/<\/tbs sequences>/i)) {
+            readNotetag = false;
+            return;
+        }
+        if (readNotetag) {
+            sequences += line + "\n";
+        }
+    })
+    return sequences;
 }
 /**
  * Parse Weapon Data From Note
@@ -274,12 +299,21 @@ GameUtils.setCameraTarget = function(target) {
     $gameMap.camTargetSet(target);
 }
 
-GameUtils.addSpriteToTilemap = function(sprite) {
-    SceneManager._scene._spriteset._tilemap.addChild(sprite);
+GameUtils.addSpriteToTilemap = function(sprite, addToCharacters = false) {
+    const spriteset = SceneManager._scene._spriteset;
+    spriteset._tilemap.addChild(sprite);
+    if (addToCharacters) {
+        spriteset._characterSprites.push(sprite);
+    }
 }
 
-GameUtils.removeSpriteFromTilemap = function(sprite) {
-    SceneManager._scene._spriteset._tilemap.removeChild(sprite);
+GameUtils.removeSpriteFromTilemap = function(sprite, removeFromCharacters = false) {
+    const spriteset = SceneManager._scene._spriteset;
+    spriteset._tilemap.removeChild(sprite);
+    if (removeFromCharacters) {
+        const idx = spriteset._characterSprites.indexOf(sprite);
+        spriteset._characterSprites.splice(idx, 1);
+    }
 }
 
 GameUtils.addWindow = function(window) {

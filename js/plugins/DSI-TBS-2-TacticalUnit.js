@@ -66,9 +66,7 @@ class TacticalUnit {
      * Update per frame.
      */
     update() {
-        if (this.battlerSprite) {
-            this.battlerSprite._character.update();
-        }
+        
     }
     /**
      * Attack
@@ -98,11 +96,23 @@ class TacticalUnit {
     skill(skillId, x, y) {
         const skill = $dataSkills[skillId];
         /** @type {TacticalRange} */
+        const sequences = skill.tbsSkill.getSequences();
         const range = skill.tbsSkill.range;
         /** @type {FLOOD_FILL_TILE[]} */
         const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
-
-        console.log({targetedTiles});
+        /** @type {TacticalUnit[]} */
+        const targets = [];
+        targetedTiles.forEach(tile => {
+            const unit = TacticalUnitManager.inst().getUnitAt(tile.x, tile.y);
+            if (unit) {
+                targets.push(unit);
+            }
+        })
+        if (!sequences) {
+            alert("Action sequences not found, please config!");
+            return;
+        }
+        TacticalSequenceManager.inst().runSequences(this, targets, sequences);
     }
     /**
      * Wait
@@ -186,6 +196,12 @@ class TacticalUnit {
         return this.battlerSprite && this.battlerSprite._character.isMoving();
     }
     /**
+     * Check if this unit is playing animation
+     */
+    isAnimationPlaying() {
+        return this.battlerSprite && this.battlerSprite._character.isAnimationPlaying();
+    }
+    /**
      * Refill action points
      */
     refillActionPoints() {
@@ -197,7 +213,8 @@ class TacticalUnit {
      */
     isBusy() {
         const isSpriteMoving = this.isMoving();
-        return isSpriteMoving;
+        const isAnimationPlaying = this.isAnimationPlaying();
+        return isSpriteMoving || isAnimationPlaying;
     }
     /**
      * On Turn Start
@@ -216,8 +233,8 @@ class TacticalUnit {
      * Play animation 
      * @param {string} animation 
      */
-    playAnimation(animation) {
-        // Implementation go here.
+    playAnimation(animationId) {
+        $gameTemp.requestAnimation([this.getCharacter()], animationId);
     }
     /**
      * Set Face Direction
@@ -305,6 +322,15 @@ class Tactical_AllyUnit extends TacticalUnit {
      constructor(position) {
         super(0, position);
         this.setController(new TacticalPlayerController(this));
+    }
+    /**
+     * Update
+     */
+    update() {
+        super.update();
+        if (this.battlerSprite) {
+            this.battlerSprite._character.update();
+        }
     }
     /**
      * Unit MOV

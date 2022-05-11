@@ -18,6 +18,16 @@ class TBS_SkillData {
 
     constructor() {
         this.range = new TacticalRange(0, 0);
+        /** @private */
+        this.sequences = null;
+    }
+
+    setSequences(str) {
+        this.sequences = str;
+    }
+
+    getSequences() {
+        return this.sequences;
     }
 
 }

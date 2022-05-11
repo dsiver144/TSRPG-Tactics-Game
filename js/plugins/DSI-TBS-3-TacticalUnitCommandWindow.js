@@ -66,7 +66,8 @@ class Window_TacticalUnitCommand extends Window_Command {
 
     onAttackCommand() {
         const unit = this.unit;
-        const cursor = TacticalBattleSystem.inst().cursor;
+        const battleSystem = TacticalBattleSystem.inst();
+        const cursor = battleSystem.cursor;
         cursor.activate();
         this.visible = false;
         
@@ -78,18 +79,19 @@ class Window_TacticalUnitCommand extends Window_Command {
             }
             
             cursor.deactivate();
+            cursor.hide();
+            TacticalRangeManager.inst().hideTileSprites(unit);
+
             TacticalRangeManager.inst().hideTileSprites(unit);
             unit.attack(x, y);
             console.log("Unit attack at", x, y);
 
-            // const waitForMoveInterval = setInterval(() => {
-            //     if (!unit.isBusy()) {
-            //         this.refresh();
-            //         this.activate();
-            //         this.visible = true;
-            //         clearInterval(waitForMoveInterval);
-            //     }
-            // }, 1000/60);
+            const waitToFinishInterval = setInterval(() => {
+                if (!battleSystem.isBusy()) {
+                    this.chooseFaceDirection();
+                    clearInterval(waitToFinishInterval);
+                }
+            }, 1000/60);
         });
 
         this.visible = false;
@@ -111,5 +113,26 @@ class Window_TacticalUnitCommand extends Window_Command {
     onWaitCommand() {
         this.unit.wait();
         this.visible = false;
+        this.unit.chooseFaceDirection();
+    }
+    /**
+     * Choose face direction
+     */
+     chooseFaceDirection() {
+        const cursor = TacticalBattleSystem.inst().cursor;
+
+        cursor.activate();
+        cursor.move(this.unit.x, this.unit.y);
+        cursor.show();
+
+        cursor.clearAllCallbacks();
+        cursor.setDirectionalCallback((direction) => {
+            this.unit.setFaceDirection(direction);
+            SoundManager.playCursor();
+        })
+        cursor.setOnOKCallback(() => {
+            cursor.deactivate();
+            SoundManager.playOk();
+        })
     }
 }

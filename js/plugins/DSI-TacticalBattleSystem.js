@@ -68,6 +68,7 @@ window.TBS = window.TBS || {};
         const startPos = GameUtils.getAllyPositionEvents();
         const enemyEvents = GameUtils.getEnemyEvents();
         console.log({startPos, enemyEvents});
+        TacticalSequenceManager.inst().reset();
         TacticalBattleSystem.inst().reset();
         TacticalBattleSystem.inst().setup(startPos, enemyEvents);
         // GameUtils.setPlayerMapScroll(false);
@@ -182,6 +183,7 @@ window.TBS = window.TBS || {};
             this.updatePhase();
             this.updateUnits();
             this.updateCursor();
+            this.updateSequences();
         }
         /**
          * Update battle phase
@@ -224,6 +226,12 @@ window.TBS = window.TBS || {};
             this.cursor.update();
         }
         /**
+         * Update sequences
+         */
+        updateSequences() {
+            TacticalSequenceManager.inst().update();
+        }
+        /**
          * Select unit phase
          */
         onSelectUnits() {
@@ -263,8 +271,9 @@ window.TBS = window.TBS || {};
                         allyUnit.setFaceDirection(direction);
                         
                         TacticalUnitManager.inst().addAllyUnit(allyUnit);
+                        this._characterSprites
                         
-                        GameUtils.addSpriteToTilemap(sprite);
+                        GameUtils.addSpriteToTilemap(sprite, true);
                     }
                 ,   () => {
                         // ON Preview Cancel
@@ -416,7 +425,7 @@ window.TBS = window.TBS || {};
                 TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
             }
 
-            $gameTemp.requestAnimation([selectedUnit.getCharacter()], 5);
+            $gameTemp.requestAnimation([selectedUnit.getCharacter()], 1);
         }
         /**
          * On Actor Unit Command Cancel.
@@ -487,7 +496,8 @@ window.TBS = window.TBS || {};
         isBusy() {
             const isPhaseTextShowing = this.spritePhaseText.bitmap != null;
             const isUnitBusy = TacticalUnitManager.inst().isUnitBusy();
-            return isPhaseTextShowing || isUnitBusy;
+            const isSequenceBusy = TacticalSequenceManager.inst().isBusy();
+            return isPhaseTextShowing || isUnitBusy || isSequenceBusy;
         }
     }
     /**
