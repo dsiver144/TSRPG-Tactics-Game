@@ -112,12 +112,14 @@ class Window_TacticalUnitCommand extends Window_Command {
     onWaitCommand() {
         this.unit.wait();
         this.visible = false;
-        this.unit.chooseFaceDirection();
+        this.chooseFaceDirection();
     }
     /**
      * Choose face direction
      */
-     chooseFaceDirection() {
+    chooseFaceDirection() {
+        this.unit.chooseFaceDirecion(true);
+
         const cursor = TacticalBattleSystem.inst().cursor;
 
         cursor.activate();
@@ -130,6 +132,8 @@ class Window_TacticalUnitCommand extends Window_Command {
             SoundManager.playCursor();
         })
         cursor.setOnOKCallback(() => {
+            this.unit.chooseFaceDirecion(false);
+
             cursor.deactivate();
             SoundManager.playOk();
         })

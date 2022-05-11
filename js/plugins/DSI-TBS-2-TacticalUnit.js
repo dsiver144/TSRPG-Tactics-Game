@@ -213,6 +213,10 @@ class TacticalUnit {
      */
     moveSprite(x, y) {
         this.battlerSprite._character.findpathToEx(x, y);
+        // this.battlerSprite._character.findpathToEx(x, y, (x, y) => {
+        //     if (!!TacticalUnitManager.inst().getUnitAt(x, y)) return false;
+        //     return true;
+        // });
     }
     /**
      * Check if the sprite is moving
@@ -269,6 +273,20 @@ class TacticalUnit {
     setFaceDirection(direction) {
         this.faceDirection = direction;
         this.getCharacter().setDirection(direction);
+    }
+    /**
+     * Choose face direction.
+     * @param {boolean} v
+     */
+    chooseFaceDirecion(v) {
+        this.isFaceDirectionChoosing = v;
+    }
+    /**
+     * Check if unit is choosing face direction
+     * @returns {boolean}
+     */
+    isChoosingFaceDirection() {
+        return !!this.isFaceDirectionChoosing;
     }
     /**
      * Turn toward point

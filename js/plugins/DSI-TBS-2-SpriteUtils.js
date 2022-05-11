@@ -164,3 +164,77 @@ Spriteset_Map.prototype.findTargetSprite = function(target) {
 	const result = DSI_TBS_2_TacticalCursor_Spriteset_Map_findTargetSprite.call(this, target);
     return result;
 };
+
+class Sprite_UnitDirectionIndicator extends Sprite_StaticMapObject {
+    /**
+     * Sprite_UnitDirectionIndicator
+     */
+    constructor() {
+        super(new Position(0, 0));
+        this.anchor.x = 0.5;
+        this.anchor.y = 0.5;
+        this.scale.x = 2.0;
+        this.scale.y = 2.0;
+        this.currentDirection = 0;
+        this.visible = false;
+        /** @type {TacticalUnit} */
+        this.unit = null;
+    }
+    /**
+     * Set Unit
+     * @param {TacticalUnit} unit 
+     */
+    setUnit(unit) {
+        this.unit = unit;
+        this.customPosition = this.unit.position;
+    }
+    /**
+     * Refresh
+     */
+    refresh() {
+        this.currentDirection = this.unit.getFaceDirection();
+        this.bitmap = ImageManager.loadTBS("Dir" + this.currentDirection);
+    }
+    /**
+     * Update
+     */
+    update() {
+        super.update();
+        this.updateDirection();
+    }
+    /**
+     * Screen X
+     * @returns {number}
+     */
+    screenX() {
+        return super.screenX() + $gameMap.tileWidth() / 2;
+    }
+    /**
+     * Screen Y
+     * @returns {number}
+     */
+    screenY() {
+        return super.screenY() - 64;
+    }
+    /**
+     * Screen Z
+     * @returns {number}
+     */
+    screenZ() {
+        return 10;
+    }
+    /**
+     * Update direction
+     * @returns {void}
+     */
+    updateDirection() {
+        if (!this.unit) return;
+        this.visible = this.unit.isChoosingFaceDirection();
+        if (this.visible) {
+            if (this.currentDirection != this.unit.getFaceDirection()) {
+                this.refresh();
+            }
+        }
+    }
+
+}

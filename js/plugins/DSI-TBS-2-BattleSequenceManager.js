@@ -184,16 +184,24 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
         this.animationId = id;
         return this;
     }
-
+    /**
+     * Get Target
+     * @returns {object}
+     */
     getTarget() {
         return this.subject.getCharacter();
     }
-
+    /**
+     * On Start
+     */
     onStart() {
         super.onStart();
         $gameTemp.requestAnimation([this.getTarget()], this.animationId);
     }
-
+    /**
+     * Check if this action is finish or not.
+     * @returns {boolean}
+     */
     isFinished() {
         return !this.getTarget().isAnimationPlaying();
     }
@@ -207,19 +215,27 @@ class TacticalSequencePlayAnimActionOnCursor extends TacticalSequencePlayAnimAct
 }
 
 class TacticalSequenceWaitAction extends TacticalSequenceAction {
-
+    /**
+     * Set Wait Frames
+     * @param {number} frames 
+     */
     setWaitFrames(frames) {
         this.waitFrames = frames;
         this.setWait(true);
     }
-
+    /**
+     * Update action
+     */
     updateAction() {
         if (this.waitFrames > 0) {
             this.waitFrames -= 1;
         }
         super.updateAction();
     }
-
+    /**
+     * Check if this action is finish or not.
+     * @returns {boolean}
+     */
     isFinished() {
         return this.waitFrames === 0;
     }
@@ -235,13 +251,35 @@ class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
         this.battleAction = action;
         this.target = target;
     }
-
+    /**
+     * On Start
+     */
     onStart() {
         super.onStart();
         this.battleAction.apply(this.target);
         console.log("> Appled Action to Target: ", this.target.result());
+        this.processActionResult();
     }
-    
+    /**
+     * Process action result
+     */
+    processActionResult() {
+        const result = this.target.result();
+        const isCritical = result.critical;
+        const isMissed = result.missed;
+        const isEvaded = result.evaded;
+        const hpDmg = result.hpAffected ? result.hpDamage : null;
+        const tpDmg = this.target.isAlive() && result.mpDamage !== 0 ?  result.mpDamage : 0;
+        const addedStates = result.addedStateObjects();
+        const removedStates = result.removedStateObjects();
+        const addedBuffs = result.addedBuffs;
+        const addedDebuffs = result.addedDebuffs;
+        const removedBuffs = result.removedBuffs;
+    }
+    /**
+     * Check if this action is finish or not.
+     * @returns {boolean}
+     */
     isFinished() {
         return true;
     }

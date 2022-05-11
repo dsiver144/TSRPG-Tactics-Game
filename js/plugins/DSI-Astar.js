@@ -98,14 +98,48 @@
         return map;
     }
 
-    Game_Character.prototype.findpathToEx = function(endX, endY) {
-        this.findpathTo(this.x, this.y, endX, endY);
+    Game_Map.prototype.blockableEventsXy = function(x, y) {
+        return this.events().filter(event => event.posNt(x, y) && event.isNormalPriority());
+    };
+
+    Game_Map.prototype.generateEventMap = function() {
+        var map = {};
+        const width = this.width();
+        const height = this.height();
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                const hasEvent = $gameMap.blockableEventsXy(x, y).length > 0;
+                map[`${x}-${y}`] = hasEvent;
+            }
+        }
+        return map;
     }
 
-    Game_Character.prototype.findpathTo = function(startX, startY, endX, endY) {
+    /**
+     * Find Path To EX
+     * @param {number} endX 
+     * @param {number} endY 
+     * @param {(x: number, y: number) => boolean} customBlockCondition 
+     */
+    Game_Character.prototype.findpathToEx = function(endX, endY, customBlockCondition) {
+        this.findpathTo(this.x, this.y, endX, endY, customBlockCondition);
+    }
+
+    /**
+     * Find Path To
+     * @param {number} startX 
+     * @param {number} startY 
+     * @param {number} endX 
+     * @param {number} endY 
+     * @param {(x: number, y: number) => boolean} customBlockCondition 
+     */
+    Game_Character.prototype.findpathTo = function(startX, startY, endX, endY, customBlockCondition) {
         const map = $gameMap.generateAstarMap();
         this.clearFindPath();
+        const eventMarker = $gameMap.generateEventMap();
         this.pathResult = easyAStar((x, y)=>{
+            if (customBlockCondition && customBlockCondition(x, y)) return false;
+            if (eventMarker[`${x}-${y}`]) return false;
             if (map[y] && map[y][x] === 0) {
                 return true; 
             } else {

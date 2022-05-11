@@ -91,6 +91,7 @@ window.TBS = window.TBS || {};
              * @type {TacticalCursor}
              */
             this.cursor = new TacticalCursor();
+            
 
             this.actorListWindow = new Window_TacticalUnitSelectionList(new Rectangle(0, 0, 300, 200));
             this.actorListWindow.setHandler('cancel', this.onActorListCancel.bind(this));
@@ -115,6 +116,10 @@ window.TBS = window.TBS || {};
             this.actorPreviewSprite = new Sprite_TacticalUnitSelection();
             GameUtils.addSpriteToTilemap(this.actorPreviewSprite);
             this.actorPreviewSprite.visible = false;
+
+            this.unitDirectionIndicatorSprite = new Sprite_UnitDirectionIndicator();
+            GameUtils.addSpriteToTilemap(this.unitDirectionIndicatorSprite);
+            
 
             // this.actorListWindow = new Window_Sel(new Rectangle(0, 0, 300, 200));
             // this.actorListWindow.visible = false;
@@ -409,7 +414,7 @@ window.TBS = window.TBS || {};
                 return;
             };
             if (selectedUnit.teamId === 0) {
-
+                this.unitDirectionIndicatorSprite.setUnit(selectedUnit);
                 this.actorUnitCommandWindow.setUnit(selectedUnit);
                 this.actorUnitCommandWindow.visible = true;
                 this.actorUnitCommandWindow.activate();

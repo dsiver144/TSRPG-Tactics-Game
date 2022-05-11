@@ -135,10 +135,12 @@ class TacticalCursor {
     updateInput() {
         if (!this.active) return;
         if (TacticalBattleSystem.inst().isBusy()) return;
-        
         if (Input.dir4 != 0) {
             if (this.onDirectionalCallback) {
-                this.onDirectionalCallback(Input.dir4);
+                if (this.lastDir4 != Input.dir4) {
+                    this.onDirectionalCallback(Input.dir4);
+                    this.lastDir4 = Input.dir4;
+                }
             } else {
                 const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
                 this.moveByInput(x, y);

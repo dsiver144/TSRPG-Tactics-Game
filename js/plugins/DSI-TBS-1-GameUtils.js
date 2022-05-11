@@ -370,7 +370,3 @@ Scene_Boot.prototype.onDatabaseLoaded = function() {
     GameUtils.setupTBSSkills();
     GameUtils.setupTBSWeapons();
 };
-
-Game_Map.prototype.blockableEventsXy = function(x, y) {
-    return this.events().filter(event => event.posNt(x, y) && event.isNormalPriority());
-};
