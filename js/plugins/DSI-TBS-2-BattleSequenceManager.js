@@ -59,6 +59,7 @@ class TacticalSequenceManager {
         this.actionIndex += 1;
         const action = this.actions[this.actionIndex];
         action && action.onStart();
+        console.log("Start action", action);
     }
     /**
      * Update sequences.
@@ -98,6 +99,7 @@ class TacticalSequenceAction {
 
         this.isNextActionStarted = false;
         this.isFinishAction = false;
+        this.isStarted = false;
     }
     /**
      * Set wait.
@@ -112,7 +114,7 @@ class TacticalSequenceAction {
      * Start action
      */
     onStart() {
-
+        this.isStarted = true;
     }
     /**
      * Finish Action
@@ -131,6 +133,14 @@ class TacticalSequenceAction {
      * Update
      */
     update() {
+        if (!this.isStarted) return;
+        this.updateAction();
+    }
+    /**
+     * Update action
+     * @returns {void}
+     */
+    updateAction() {
         if (this.isFinished() && !this.isFinishAction) {
             this.onFinish();
             this.isFinishAction = true;
@@ -173,6 +183,7 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
      * Start action
      */
     onStart() {
+        super.onStart();
         $gameTemp.requestAnimation([this.getTarget()], this.animationId);
     }
     /**
@@ -180,7 +191,7 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
      * @returns {boolean}
      */
     isFinished() {
-        return !this.subject.getCharacter().isAnimationPlaying();
+        return !this.getTarget().isAnimationPlaying();
     }
 }
 
@@ -203,13 +214,13 @@ class TacticalSequenceWaitAction extends TacticalSequenceAction {
         this.setWait(true);
     }
     /**
-     * Update
+     * Update action
      */
-    update() {
+    updateAction() {
         if (this.waitFrames > 0) {
             this.waitFrames -= 1;
         }
-        super.update();
+        super.updateAction();
     }
     /**
      * Check if this action is finish or not.

@@ -224,6 +224,18 @@ class TacticalCursor {
         return valid;
     }
 
+    startAnimation() {
+        this._animationPlaying = true;
+    }
+
+    isAnimationPlaying() {
+        return this._animationPlaying;
+    }
+
+    endAnimation() {
+        this._animationPlaying = false;
+    }
+
 }
 
 class Sprite_TacticalCursor extends Sprite_OnMapObject {

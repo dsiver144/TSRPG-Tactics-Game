@@ -82,9 +82,7 @@ class Window_TacticalUnitCommand extends Window_Command {
             cursor.hide();
             TacticalRangeManager.inst().hideTileSprites(unit);
 
-            TacticalRangeManager.inst().hideTileSprites(unit);
             unit.attack(x, y);
-            console.log("Unit attack at", x, y);
 
             const waitToFinishInterval = setInterval(() => {
                 if (!battleSystem.isBusy()) {
@@ -92,6 +90,7 @@ class Window_TacticalUnitCommand extends Window_Command {
                     clearInterval(waitToFinishInterval);
                 }
             }, 1000/60);
+            
         });
 
         this.visible = false;
@@ -122,7 +121,7 @@ class Window_TacticalUnitCommand extends Window_Command {
         const cursor = TacticalBattleSystem.inst().cursor;
 
         cursor.activate();
-        cursor.move(this.unit.x, this.unit.y);
+        cursor.move(this.unit.position.x, this.unit.position.y);
         cursor.show();
 
         cursor.clearAllCallbacks();
