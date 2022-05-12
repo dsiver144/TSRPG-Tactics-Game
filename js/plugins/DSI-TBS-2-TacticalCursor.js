@@ -143,6 +143,7 @@ class TacticalCursor {
                     blockMove = this.onDirectionalCallback(Input.dir4, x, y);
                     this.lastDir4 = Input.dir4;
                 }
+                blockMove = this.directionalMoveBlocked;
             }
             if (blockMove) return;
             this.moveByInput(x, y);
@@ -206,9 +207,11 @@ class TacticalCursor {
     /**
      * Set Directional Callback
      * @param {(direction: number, x?: number, y?: number) => boolean} callback 
+     * @param {boolean} moveBlocked
      */
-    setDirectionalCallback(callback) {
+    setDirectionalCallback(callback, moveBlocked = true) {
         this.onDirectionalCallback = callback;
+        this.directionalMoveBlocked = moveBlocked;
     }
     /**
      * Clear all callbacks
@@ -217,6 +220,7 @@ class TacticalCursor {
         this.onOKCallback = null;
         this.onCancelCallback = null;
         this.onDirectionalCallback = null;
+        this.directionalMoveBlocked = false;
     }
     /**
      * Check if cursor is inside valid action positions.

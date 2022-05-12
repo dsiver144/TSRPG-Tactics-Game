@@ -65,7 +65,11 @@ class Window_TacticalUnitCommand extends Window_Command {
     }
 
     onAttackCommand() {
-        this.onUseSkill(this.unit.attackSkillId());
+        this.onUseSkill(this.unit.attackSkillId(), () => {
+            
+        }, () => {
+
+        });
     }
 
     onDefendCommand() {
@@ -81,15 +85,32 @@ class Window_TacticalUnitCommand extends Window_Command {
     }
 
     onWaitCommand() {
-        this.unit.wait();
+        const cursor = TacticalBattleSystem.inst().cursor;
         this.visible = false;
-        this.chooseFaceDirection();
+        this.chooseFaceDirection(() => {
+            this.unit.wait();
+        }, () => {
+            this.visible = true;
+            cursor.deactivate();
+            this.activate();
+        })
+    }
+    /**
+     * On Turn End
+     * @param {Function} onFinishCallback
+     * @param {Function} onCancelCallback
+     */
+    onTurnEnd(onFinishCallback = null, onCancelCallback = null) {
+        this.visible = false;
+        this.chooseFaceDirection(onFinishCallback, onCancelCallback);
     }
     /**
      * On Use Skill
      * @param {number} skillId 
+     * @param {Function} onFinishCallback 
+     * @param {Function} onCancelCallback 
      */
-    onUseSkill(skillId) {
+    onUseSkill(skillId, onFinishCallback = null, onCancelCallback = null) {
         const skill = $dataSkills[skillId];
         /** @type {TBS_SkillData} */
         const tbsSkill = skill.tbsSkill;
@@ -105,16 +126,18 @@ class Window_TacticalUnitCommand extends Window_Command {
             TacticalRangeManager.inst().showAOETilesAtCursor(tbsSkill.range.aoe);
             actionTileImg = 'BlueSquare';
         }
-
         TacticalRangeManager.inst().showActionTileSprites(unit, skillId, actionTileImg);
+        // Directional button callback
         cursor.setDirectionalCallback((direction, x, y) => {
             if (!unit.canUseActionAt(x, y)) {
                 console.log("Cant use skill here");
                 return;
             }
             return false;
-        })
+        }, false)
+        // OK Callback
         cursor.setOnOKCallback((x, y) => {
+
             if (!unit.canUseActionAt(x, y)) {
                 SoundManager.playBuzzer();
                 return;
@@ -129,19 +152,34 @@ class Window_TacticalUnitCommand extends Window_Command {
 
             const waitToFinishInterval = setInterval(() => {
                 if (!battleSystem.isBusy()) {
-                    this.chooseFaceDirection();
+                    this.chooseFaceDirection(() => {
+                        unit.onActionEnd();
+                        cursor.show();
+                        cursor.activate();
+                        onFinishCallback && onFinishCallback();
+                    });
                     clearInterval(waitToFinishInterval);
                 }
             }, 1000/60);
             
         });
+        // Cancel Callback
+        cursor.setOnCancelCallback(() => {
+            TacticalRangeManager.inst().hideTileSprites(unit);
+            TacticalRangeManager.inst().hideTileSprites(cursor);
+
+            onCancelCallback && onCancelCallback();
+            SoundManager.playCancel();
+        })
 
         this.visible = false;
     }
     /**
      * Choose face direction
+     * @param {Function} onFinishCallback
+     * @param {Function} onCancelCallback
      */
-    chooseFaceDirection() {
+    chooseFaceDirection(onFinishCallback, onCancelCallback) {
         this.unit.chooseFaceDirecion(true);
 
         const cursor = TacticalBattleSystem.inst().cursor;
@@ -152,15 +190,26 @@ class Window_TacticalUnitCommand extends Window_Command {
 
         cursor.clearAllCallbacks();
         cursor.setDirectionalCallback((direction) => {
-            this.unit.setFaceDirection(direction);
             SoundManager.playCursor();
-            return true;
-        })
-        cursor.setOnOKCallback(() => {
-            this.unit.chooseFaceDirecion(false);
 
-            cursor.deactivate();
+            this.unit.setFaceDirection(direction);
+            return false;
+        }, true)
+        cursor.setOnOKCallback(() => {
             SoundManager.playOk();
+
+            this.unit.chooseFaceDirecion(false);
+            cursor.deactivate();
+            onFinishCallback && onFinishCallback();
         })
+        if (onCancelCallback) {
+            cursor.setOnCancelCallback(() => {
+                SoundManager.playCancel();
+
+                this.unit.chooseFaceDirecion(false);
+                cursor.clearAllCallbacks();
+                onCancelCallback();
+            })
+        }
     }
 }

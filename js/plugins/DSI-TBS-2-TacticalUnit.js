@@ -157,7 +157,7 @@ class TacticalUnit {
      * Wait
      */
     wait() {
-
+        this.onTurnEnd();
     }
     /**
      * Move
@@ -263,6 +263,7 @@ class TacticalUnit {
      * On Turn Start
      */
     onTurnStart() {
+        this.isMoved = false;
         this.refillActionPoints();
         this.calculateTurnStartState();
     }
@@ -270,7 +271,27 @@ class TacticalUnit {
      * On Turn End
      */
     onTurnEnd() {
+        this.actionPoints = 0;
         this.calculateTurnEndState();
+    }
+    /**
+     * On Action End.
+     */
+    onActionEnd() {
+        this.consumeActionPoints(1);
+        if (this.hasActed()) {
+            this.onTurnEnd();
+        }
+    }
+    /**
+     * Consume action points
+     * @param {number} v 
+     */
+    consumeActionPoints(v) {
+        this.actionPoints -= v;
+        if (this.actionPoints < 0) {
+            this.actionPoints = 0;
+        }
     }
     /**
      * Play animation 

@@ -436,7 +436,7 @@ window.TBS = window.TBS || {};
          * Update player turn
          */
         updatePlayerTurn() {
-            const isAllPlayerFinished = TacticalUnitManager.inst().allyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
+            const isAllPlayerFinished = TacticalUnitManager.inst().allyUnits.every(unit => !unit.isBusy() && unit.hasActed());
             if (isAllPlayerFinished) {
                 this.onPlayerTurnEnd();
             }
