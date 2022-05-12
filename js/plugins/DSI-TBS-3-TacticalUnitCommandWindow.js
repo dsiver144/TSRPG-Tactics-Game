@@ -65,36 +65,7 @@ class Window_TacticalUnitCommand extends Window_Command {
     }
 
     onAttackCommand() {
-        const unit = this.unit;
-        const battleSystem = TacticalBattleSystem.inst();
-        const cursor = battleSystem.cursor;
-        cursor.activate();
-        this.visible = false;
-        
-        TacticalRangeManager.inst().showActionTileSprites(unit, unit.attackSkillId());
-        cursor.setOnOKCallback((x, y) => {
-            if (!unit.canUseActionAt(x, y)) {
-                SoundManager.playBuzzer();
-                return;
-            }
-            
-            cursor.deactivate();
-            cursor.hide();
-            TacticalRangeManager.inst().hideTileSprites(unit);
-
-            unit.attack(x, y);
-
-            const waitToFinishInterval = setInterval(() => {
-                if (!battleSystem.isBusy()) {
-                    this.chooseFaceDirection();
-                    clearInterval(waitToFinishInterval);
-                }
-            }, 1000/60);
-            
-        });
-
-        this.visible = false;
-
+        this.onUseSkill(this.unit.attackSkillId());
     }
 
     onDefendCommand() {
@@ -115,6 +86,59 @@ class Window_TacticalUnitCommand extends Window_Command {
         this.chooseFaceDirection();
     }
     /**
+     * On Use Skill
+     * @param {number} skillId 
+     */
+    onUseSkill(skillId) {
+        const skill = $dataSkills[skillId];
+        /** @type {TBS_SkillData} */
+        const tbsSkill = skill.tbsSkill;
+
+        const unit = this.unit;
+        const battleSystem = TacticalBattleSystem.inst();
+        const cursor = battleSystem.cursor;
+        cursor.activate();
+        this.visible = false;
+
+        let actionTileImg = 'RedSquare';
+        if (tbsSkill.range.aoe) {
+            TacticalRangeManager.inst().showAOETilesAtCursor(tbsSkill.range.aoe);
+            actionTileImg = 'BlueSquare';
+        }
+
+        TacticalRangeManager.inst().showActionTileSprites(unit, skillId, actionTileImg);
+        cursor.setDirectionalCallback((direction, x, y) => {
+            if (!unit.canUseActionAt(x, y)) {
+                console.log("Cant use skill here");
+                return;
+            }
+            return false;
+        })
+        cursor.setOnOKCallback((x, y) => {
+            if (!unit.canUseActionAt(x, y)) {
+                SoundManager.playBuzzer();
+                return;
+            }
+            
+            cursor.deactivate();
+            cursor.hide();
+            TacticalRangeManager.inst().hideTileSprites(unit);
+            TacticalRangeManager.inst().hideTileSprites(cursor);
+
+            unit.attack(x, y);
+
+            const waitToFinishInterval = setInterval(() => {
+                if (!battleSystem.isBusy()) {
+                    this.chooseFaceDirection();
+                    clearInterval(waitToFinishInterval);
+                }
+            }, 1000/60);
+            
+        });
+
+        this.visible = false;
+    }
+    /**
      * Choose face direction
      */
     chooseFaceDirection() {
@@ -130,6 +154,7 @@ class Window_TacticalUnitCommand extends Window_Command {
         cursor.setDirectionalCallback((direction) => {
             this.unit.setFaceDirection(direction);
             SoundManager.playCursor();
+            return true;
         })
         cursor.setOnOKCallback(() => {
             this.unit.chooseFaceDirecion(false);

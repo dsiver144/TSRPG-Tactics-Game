@@ -84,16 +84,34 @@ class TacticalRangeManager {
      */
     calculateAOETiles(startX, startY, aoeRange) {
         const result = [];
-        for (var y = -range.max; y <= range.max; y++) {
-            for (var x = -range.max; x <= range.max; x++) {
+        for (var y = -aoeRange.range; y <= aoeRange.range; y++) {
+            for (var x = -aoeRange.range; x <= aoeRange.range; x++) {
                 const dist = Math.abs(x) + Math.abs(y);
-                if (aoeRange.shape === AOE_RANGE_SHAPE.DIAMOND && !(dist >= range.min && dist <= range.max)) {
+                console.log("CAL", aoeRange.shape, dist);
+                if (aoeRange.shape === AOE_RANGE_SHAPE.DIAMOND && (dist > aoeRange.range)) {
                     continue;
                 }
                 result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
             }
         }
         return result;
+    }
+    /**
+     * Show AOE Tiles At Cursor
+     * @param {TacticalAOERange} aoeRange 
+     */
+    showAOETilesAtCursor(aoeRange) {
+        const cursor = TacticalBattleSystem.inst().cursor;
+        const aoeTiles = this.calculateAOETiles(cursor.position.x, cursor.position.y, aoeRange);
+        aoeTiles.forEach(tile => {
+            let offsets = new Position(tile.x - cursor.position.x, tile.y - cursor.position.y);
+            console.log({offsets});
+            const rangeSprite = new Sprite_DynamicRange(cursor.sprite, offsets);
+            GameUtils.addSpriteToTilemap(rangeSprite);
+
+            rangeSprite.unit = cursor;
+            this.tileSprites.push(rangeSprite);
+        })
     }
     /**
      * Find outer tiles
@@ -172,13 +190,13 @@ class TacticalRangeManager {
      * @param {TacticalUnit} unit 
      * @param {number} skillId
      */
-    showActionTileSprites(unit, skillId) {
+    showActionTileSprites(unit, skillId, bitmapName = 'RedSquare') {
         const skill = $dataSkills[skillId];
         const actionTiles = this.calculateActionTiles(unit.position.x, unit.position.y, skill.tbsSkill.range);
         unit.actionTiles = actionTiles;
         actionTiles.forEach(tile => {
             const {x, y} = tile;
-            const rangeSprite = new Sprite_StaticRange(new Position(x, y), true ? "RedSquare" : "BlueSquare");
+            const rangeSprite = new Sprite_StaticRange(new Position(x, y), bitmapName);
             GameUtils.addSpriteToTilemap(rangeSprite);
             
             rangeSprite.unit = unit;
@@ -225,8 +243,9 @@ class TacticalRangeManager {
             affectPositions = affectPositions.concat(sameDirectionTiles);
         }
         if (range.aoe) {
-            let aoeTiles = TacticalRangeManager.inst().calculateAOETiles(targetX, targetY, range.aoe.range);
+            let aoeTiles = TacticalRangeManager.inst().calculateAOETiles(targetX, targetY, range.aoe);
             aoeTiles = aoeTiles.filter(tile => tile.x != targetX && tile.y != targetY);
+            // console.log({aoeTiles});
             affectPositions = affectPositions.concat(aoeTiles);
         }
         return affectPositions;

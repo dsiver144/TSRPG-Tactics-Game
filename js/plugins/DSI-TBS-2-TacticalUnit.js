@@ -92,9 +92,12 @@ class TacticalUnit {
         this.turnTowardPoint(x, y);
 
         const skill = $dataSkills[skillId];
+        /** @type {TBS_SkillData} */
+        const tbsSkill = $dataSkills[skillId].tbsSkill;
         /** @type {TacticalRange} */
-        const sequences = skill.tbsSkill.getSequences();
-        const range = skill.tbsSkill.range;
+        const sequences = tbsSkill.getSequences();
+        const range = tbsSkill.range;
+        const targetTypes = tbsSkill.targets || ["enemy"];
         /** @type {FLOOD_FILL_TILE[]} */
         const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
         /** @type {TacticalUnit[]} */

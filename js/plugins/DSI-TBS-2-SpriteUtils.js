@@ -144,6 +144,21 @@ class Sprite_DynamicRange extends Sprite {
     update() {
         super.update();
         this.updatePosition();
+        this.updateAOEVisibility();
+    }
+    /**
+     * Set visiblity callback
+     * @param {Function} callback 
+     */
+    setVisiblityCallback(callback) {
+        this.visibilityCallback = callback;
+    }
+    /**
+     * Upadate AOE Visiblity
+     */
+    updateAOEVisibility() {
+        if (!this.visibilityCallback) return;
+        this.visible = this.visibilityCallback();
     }
     /**
      * Update position
@@ -151,7 +166,7 @@ class Sprite_DynamicRange extends Sprite {
     updatePosition() {
         this.x = this.target.x + this.offset.x * $gameMap.tileWidth();
         this.y = this.target.y + this.offset.y * $gameMap.tileHeight();
-        this.z = 0;
+        this.z = 5;
     }
 }
 

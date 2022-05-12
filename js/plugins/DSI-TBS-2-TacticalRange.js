@@ -93,13 +93,13 @@ class TacticalRange {
     /**
      * Set AOE Range
      * @param {Number} range 
-     * @param {AOE_RANGE_SHAPE} shape 
+     * @param {string} shape 
      * @returns 
      */
     setAOE(range, shape) {
         this.aoe = new TacticalAOERange();
-        this.aoe.shape
-        this.aoe.setRange(range).setShape(shape);
+        console.log(shape, AOE_RANGE_SHAPE[shape]);
+        this.aoe.setRange(range).setShape(AOE_RANGE_SHAPE[shape]);
         return this;
     }
     /**

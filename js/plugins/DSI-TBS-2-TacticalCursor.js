@@ -136,15 +136,16 @@ class TacticalCursor {
         if (!this.active) return;
         if (TacticalBattleSystem.inst().isBusy()) return;
         if (Input.dir4 != 0) {
+            const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
+            let blockMove = false;
             if (this.onDirectionalCallback) {
                 if (this.lastDir4 != Input.dir4) {
-                    this.onDirectionalCallback(Input.dir4);
+                    blockMove = this.onDirectionalCallback(Input.dir4, x, y);
                     this.lastDir4 = Input.dir4;
                 }
-            } else {
-                const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
-                this.moveByInput(x, y);
             }
+            if (blockMove) return;
+            this.moveByInput(x, y);
         }
         if (TouchInput.isTriggered()) {
             const x = $gameMap.canvasToMapX(TouchInput.x);
@@ -204,7 +205,7 @@ class TacticalCursor {
     }
     /**
      * Set Directional Callback
-     * @param {(direction: number) => void} callback 
+     * @param {(direction: number, x?: number, y?: number) => boolean} callback 
      */
     setDirectionalCallback(callback) {
         this.onDirectionalCallback = callback;

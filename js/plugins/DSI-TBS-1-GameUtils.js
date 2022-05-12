@@ -210,7 +210,13 @@ GameUtils.setupTBSWeapons = function() {
             if (line.match(/^penetrate:\s*(true|false)/i)) {
                 skillData.range.setPenerate(RegExp.$1 === 'true');
             }
-            if (line.match(/^targets:\s*(.+?)/i)) {
+            if (line.match(/^aoe:\s*(.+)/i)) {
+                const params = RegExp.$1.split(",").map(s => s.trim());
+                const range = Number(params[0]);
+                const shape = params[1];
+                skillData.range.setAOE(range, shape);
+            }
+            if (line.match(/^targets:\s*(.+)/i)) {
                 const targets = RegExp.$1.split(",").map(s => s.trim());
                 skillData.setTargets(targets);
             }

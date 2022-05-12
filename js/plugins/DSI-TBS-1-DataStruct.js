@@ -26,7 +26,7 @@ class TBS_SkillData {
     }
     /**
      * Set Targets
-     * @param {('ally' | 'enemy')[]} targets 
+     * @param {('ally' | 'enemy' | 'user')[]} targets 
      */
     setTargets(targets) {
         this.targets = targets;
