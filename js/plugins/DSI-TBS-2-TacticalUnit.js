@@ -90,16 +90,37 @@ class TacticalUnit {
      */
     skill(skillId, x, y) {
         this.turnTowardPoint(x, y);
-
         const skill = $dataSkills[skillId];
         /** @type {TBS_SkillData} */
-        const tbsSkill = $dataSkills[skillId].tbsSkill;
+        const tbsSkill = skill.tbsSkill;
         /** @type {TacticalRange} */
         const sequences = tbsSkill.getSequences();
+        /** @type {TacticalUnit[]} */
+        const targets = this.getTargetsWhenUsingSkillAt(skillId, x, y);
+        if (!sequences) {
+            alert("Action sequences not found, please config!");
+            return;
+        }
+        this.forceAction(skillId);
+        TacticalSequenceManager.inst().runSequences(this, targets, sequences);
+    }
+    /**
+     * Get Targets (TacticalUnit)
+     * @param {number} skillId 
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {TacticalUnit[]}
+     */
+    getTargetsWhenUsingSkillAt(skillId, x, y) {
+        const skill = $dataSkills[skillId];
+        /** @type {TBS_SkillData} */
+        const tbsSkill = skill.tbsSkill;
+        /** @type {TacticalRange} */
         const range = tbsSkill.range;
-        const targetTypes = tbsSkill.targets || ["enemy"];
+        const targetTypes = tbsSkill.getTargets();
         /** @type {FLOOD_FILL_TILE[]} */
         const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
+        console.log({targetedTiles});
         /** @type {TacticalUnit[]} */
         const targets = [];
         targetedTiles.forEach(tile => {
@@ -108,18 +129,7 @@ class TacticalUnit {
                 targets.push(unit);
             }
         })
-        if (!sequences) {
-            alert("Action sequences not found, please config!");
-            return;
-        }
-        this.forceAction(skillId);
-        const action = this.currentAction();
-        targets.forEach(unit => {
-            action.apply(unit.battler);
-            console.log("RESULT: ", unit.battler.result());
-        })
-        console.log(targets.map(u => u.battler));
-        TacticalSequenceManager.inst().runSequences(this, targets, sequences);
+        return targets;
     }
     /**
      * Force action

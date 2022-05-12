@@ -87,7 +87,6 @@ class TacticalRangeManager {
         for (var y = -aoeRange.range; y <= aoeRange.range; y++) {
             for (var x = -aoeRange.range; x <= aoeRange.range; x++) {
                 const dist = Math.abs(x) + Math.abs(y);
-                console.log("CAL", aoeRange.shape, dist);
                 if (aoeRange.shape === AOE_RANGE_SHAPE.DIAMOND && (dist > aoeRange.range)) {
                     continue;
                 }
@@ -244,8 +243,7 @@ class TacticalRangeManager {
         }
         if (range.aoe) {
             let aoeTiles = TacticalRangeManager.inst().calculateAOETiles(targetX, targetY, range.aoe);
-            aoeTiles = aoeTiles.filter(tile => tile.x != targetX && tile.y != targetY);
-            // console.log({aoeTiles});
+            // aoeTiles = aoeTiles.filter(tile => tile.x != targetX && tile.y != targetY);
             affectPositions = affectPositions.concat(aoeTiles);
         }
         return affectPositions;

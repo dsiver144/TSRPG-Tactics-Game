@@ -14,13 +14,21 @@ class TBS_EnemyData {
     }
 }
 
+/**
+ * @enum
+ */
+const TBS_TARGET_TYPE = {
+    "ally": 0,
+    "enemy": 1,
+    "user": -1
+}
 class TBS_SkillData {
     /**
      * TBS_SkillData
      */
     constructor() {
         this.range = new TacticalRange(0, 0);
-        this.targets = [];
+        this.targets = ['enemy'];
         /** @private */
         this.sequences = null;
     }
@@ -30,6 +38,13 @@ class TBS_SkillData {
      */
     setTargets(targets) {
         this.targets = targets;
+    }
+    /**
+     * Target Types
+     * @returns {TBS_TARGET_TYPE[]}
+     */
+    getTargets() {
+        return this.targets.map(t => TBS_TARGET_TYPE[t]);
     }
     /**
      * Set Sequences
