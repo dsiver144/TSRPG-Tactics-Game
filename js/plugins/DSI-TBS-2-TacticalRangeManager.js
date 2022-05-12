@@ -243,7 +243,7 @@ class TacticalRangeManager {
         }
         if (range.aoe) {
             let aoeTiles = TacticalRangeManager.inst().calculateAOETiles(targetX, targetY, range.aoe);
-            // aoeTiles = aoeTiles.filter(tile => tile.x != targetX && tile.y != targetY);
+            aoeTiles = aoeTiles.filter(tile => !(tile.x == targetX && tile.y == targetY));
             affectPositions = affectPositions.concat(aoeTiles);
         }
         return affectPositions;
