@@ -396,28 +396,36 @@ window.TBS = window.TBS || {};
             this.showPhaseTextSprite("PlayerTurn");
             this.currentPhase = 'updateTurn';
 
-            this.cursor.activate();
-            this.cursor.setOnOKCallback(this.cursorOnPlayerTurn.bind(this));
+            this.cursorOnPlayerTurn();
             
             TacticalUnitManager.inst().allyUnits.forEach((unit) => {
                 unit.onTurnStart();
             });
         }
         /**
+         * Cursor on Player Turn
+         */
+        cursorOnPlayerTurn() {
+            this.cursor.activate();
+            this.cursor.setOnOKCallback(this.cursorOnPlayerTurnCallback.bind(this));
+        }
+        /**
          * Cursor on player turn.
          * @param {number} x 
          * @param {number} y 
          */
-        cursorOnPlayerTurn(x, y) {
+        cursorOnPlayerTurnCallback(x, y) {
             const selectedUnit = TacticalUnitManager.inst().getUnitAt(x, y);
             if (!selectedUnit) {
                 return;
             };
             if (selectedUnit.teamId === 0) {
                 this.unitDirectionIndicatorSprite.setUnit(selectedUnit);
-                this.actorUnitCommandWindow.setUnit(selectedUnit);
-                this.actorUnitCommandWindow.visible = true;
-                this.actorUnitCommandWindow.activate();
+
+                selectedUnit.controller.onSelect();
+                // this.actorUnitCommandWindow.setUnit(selectedUnit);
+                // this.actorUnitCommandWindow.visible = true;
+                // this.actorUnitCommandWindow.activate();
 
                 this.cursor.deactivate();
             } else {
@@ -430,7 +438,7 @@ window.TBS = window.TBS || {};
          */
         onActorUnitCommandCancel() {
             this.actorUnitCommandWindow.visible = false;
-            this.cursor.setOnOKCallback(this.cursorOnPlayerTurn.bind(this));
+            this.cursor.setOnOKCallback(this.cursorOnPlayerTurnCallback.bind(this));
         }
         /**
          * Update player turn

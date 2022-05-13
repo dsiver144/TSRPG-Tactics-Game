@@ -66,7 +66,7 @@ class TacticalUnit {
      * Update per frame.
      */
     update() {
-        
+        this.controller.update();
     }
     /**
      * Attack
@@ -74,7 +74,7 @@ class TacticalUnit {
      * @param {number} y
      */
     attack(x, y) {
-        this.skill(this.attackSkillId(), x, y);
+        this.useSkill(this.attackSkillId(), x, y);
     }
     /**
      * Defend
@@ -88,7 +88,7 @@ class TacticalUnit {
      * @param {number} x
      * @param {number} y
      */
-    skill(skillId, x, y) {
+    useSkill(skillId, x, y) {
         this.turnTowardPoint(x, y);
         const skill = $dataSkills[skillId];
         /** @type {TBS_SkillData} */
@@ -236,7 +236,7 @@ class TacticalUnit {
      * @returns {boolean}
      */
     isMoving() {
-        return this.battlerSprite && this.battlerSprite._character.isMoving();
+        return this.battlerSprite && (this.battlerSprite._character.isMoving() || this.battlerSprite._character.hasPath());
     }
     /**
      * Check if this unit is playing animation
@@ -423,6 +423,10 @@ class Tactical_AllyUnit extends TacticalUnit {
         if (this.battlerSprite) {
             this.battlerSprite._character.update();
         }
+    }
+    
+    refillActionPoints() {
+        this.actionPoints = 2;
     }
     /**
      * Unit MOV

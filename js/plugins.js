@@ -22,5 +22,8 @@ var $plugins =
 {"name":"DSI-TBS-3-TacticalUnitCommandWindow","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-3-TacticalUnitActionListWindow","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-3-TacticalUnitSelectionWindow","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-3-Tactical_PlayerCommand","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-3-TacticalPlayerController","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-3-TacticalBotController","status":true,"description":"","parameters":{}},
 {"name":"DSI-TacticalBattleSystem","status":true,"description":"(v1.0) A custom plugin by dsiver144","parameters":{"testParam2:number":"144"}}
 ];
