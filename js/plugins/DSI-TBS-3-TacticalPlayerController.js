@@ -43,6 +43,9 @@ class TacticalPlayerController extends TacticalUnitController {
         this.commandWindow.setUnit(this.unit);
         this.cursor = TacticalBattleSystem.inst().cursor;
 
+        this.commandWindow.x = this.unit.battlerSprite.x + 50;
+        this.commandWindow.y = this.unit.battlerSprite.y - this.commandWindow.height;
+
         this.commandWindow.setHandler('move', this.onMoveCommand.bind(this));
         this.commandWindow.setHandler('attack', this.onAttackCommand.bind(this));
         this.commandWindow.setHandler('defend', this.onDefendCommand.bind(this));
@@ -103,7 +106,7 @@ class TacticalPlayerController extends TacticalUnitController {
      * @param {number} skillId 
      * @param {Function} onFinishCallback 
      * @param {Function} onCancelCallback 
-     */
+     */65
     onUseSkill(skillId, onFinishCallback = null, onCancelCallback = null) {
         const skill = $dataSkills[skillId];
         /** @type {TBS_SkillData} */

@@ -31,6 +31,7 @@ class TBS_SkillData {
         this.targets = ['enemy'];
         /** @private */
         this.sequences = null;
+        this.tileImg = 'RedSquare';
     }
     /**
      * Set Targets
@@ -59,6 +60,20 @@ class TBS_SkillData {
      */
     getSequences() {
         return this.sequences;
+    }
+    /**
+     * Set Tile Image
+     * @param {string} imgPath 
+     */
+    setTileImage(imgPath) {
+        this.tileImg = imgPath;
+    }
+    /**
+     * Get Tile Image
+     * @returns {string}
+     */
+    getTileImage() {
+        return this.tileImg;
     }
 
 }

@@ -206,7 +206,7 @@ class TacticalCursor {
     }
     /**
      * Set Directional Callback
-     * @param {(direction: number, x?: number, y?: number) => boolean} callback 
+     * @param {(direction: number, x?: number, y?: number) => void} callback 
      * @param {boolean} moveBlocked
      */
     setDirectionalCallback(callback, moveBlocked = true) {

@@ -220,6 +220,9 @@ GameUtils.setupTBSWeapons = function() {
                 const targets = RegExp.$1.split(",").map(s => s.trim());
                 skillData.setTargets(targets);
             }
+            if (line.match(/tileImage:\s*(.+)/i)) {
+                skillData.setTileImage = RegExp.$1.trim();
+            }
         }
     })
     return skillData;

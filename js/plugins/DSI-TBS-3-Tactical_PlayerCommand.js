@@ -164,9 +164,9 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         this.cursor.activate();
         this.commandWindow.visible = false;
 
-        let actionTileImg = 'RedSquare';
+        let actionTileImg = tbsSkill.getTileImage();
         if (tbsSkill.range.aoe) {
-            TacticalRangeManager.inst().showAOETilesAtCursor(tbsSkill.range.aoe);
+            TacticalRangeManager.inst().showAOETilesAtCursor(tbsSkill.range.aoe, actionTileImg);
             actionTileImg = 'BlueSquare';
         }
         TacticalRangeManager.inst().showActionTileSprites(this.unit, this.skillId, actionTileImg);
@@ -176,7 +176,6 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
                 console.log("Cant use skill here");
                 return;
             }
-            return false;
         }, false)
         // OK Callback
         this.cursor.setOnOKCallback((x, y) => {

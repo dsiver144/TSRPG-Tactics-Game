@@ -98,14 +98,14 @@ class TacticalRangeManager {
     /**
      * Show AOE Tiles At Cursor
      * @param {TacticalAOERange} aoeRange 
+     * @param {string} bitmapName
      */
-    showAOETilesAtCursor(aoeRange) {
+    showAOETilesAtCursor(aoeRange, bitmapName = 'RedSquare') {
         const cursor = TacticalBattleSystem.inst().cursor;
         const aoeTiles = this.calculateAOETiles(cursor.position.x, cursor.position.y, aoeRange);
         aoeTiles.forEach(tile => {
             let offsets = new Position(tile.x - cursor.position.x, tile.y - cursor.position.y);
-            console.log({offsets});
-            const rangeSprite = new Sprite_DynamicRange(cursor.sprite, offsets);
+            const rangeSprite = new Sprite_DynamicRange(cursor.sprite, offsets, bitmapName);
             GameUtils.addSpriteToTilemap(rangeSprite);
 
             rangeSprite.unit = cursor;

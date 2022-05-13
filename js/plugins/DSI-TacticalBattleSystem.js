@@ -93,13 +93,13 @@ window.TBS = window.TBS || {};
             this.cursor = new TacticalCursor();
             
 
-            this.actorListWindow = new Window_TacticalUnitSelectionList(new Rectangle(0, 0, 300, 200));
+            this.actorListWindow = new Window_TacticalUnitSelectionList(new Rectangle(40, 40, 300, 200));
             this.actorListWindow.setHandler('cancel', this.onActorListCancel.bind(this));
             this.actorListWindow.visible = false;
             this.actorListWindow.deactivate();
             GameUtils.addWindow(this.actorListWindow);
 
-            this.actorUnitCommandWindow = new Window_TacticalUnitCommand(new Rectangle(0, 0, 300, 200));
+            this.actorUnitCommandWindow = new Window_TacticalUnitCommand(new Rectangle(40, 40, 300, 200));
             this.actorUnitCommandWindow.setHandler('cancel', this.onActorUnitCommandCancel.bind(this));
             this.actorUnitCommandWindow.visible = false;
             this.actorUnitCommandWindow.deactivate();
