@@ -43,9 +43,6 @@ class TacticalPlayerController extends TacticalUnitController {
         this.commandWindow.setUnit(this.unit);
         this.cursor = TacticalBattleSystem.inst().cursor;
 
-        this.commandWindow.x = this.unit.battlerSprite.x + 50;
-        this.commandWindow.y = this.unit.battlerSprite.y - this.commandWindow.height;
-
         this.commandWindow.setHandler('move', this.onMoveCommand.bind(this));
         this.commandWindow.setHandler('attack', this.onAttackCommand.bind(this));
         this.commandWindow.setHandler('defend', this.onDefendCommand.bind(this));
