@@ -77,32 +77,64 @@ class TacticalRangeManager {
     }
     /**
      * Calculate Selection Tiles
-     * @param {number} x 
-     * @param {number} y 
-     * @param {TacticalActionSelection} selection 
+     * @param {TacticalUnit} unit
+     * @param {number} startX
+     * @param {number} startY
+     * @param {TacticalRange} range 
      * @returns {FLOOD_FILL_TILE[]}
      */
-    calculateSelectionTiles(startX, startY, selection) {
-        const result = [];
-        for (var y = -selection.range; y <= selection.range; y++) {
-            for (var x = -selection.range; x <= selection.range; x++) {
-                const dist = Math.abs(x) + Math.abs(y);
-                if (selection.type === AOE_RANGE_SHAPE.DIAMOND && (dist > selection.range)) {
-                    continue;
+    calculateSelectionTiles(unit, startX, startY, range) {
+        const selection = range.getSelection();
+        let result = [];
+        switch(selection.getType()) {
+            case SELECTION_TYPE.ALL:
+                const tiles = TacticalRangeManager.inst().calculateActionTiles(unit.position.x, unit.position.y, range);
+                result = result.concat(tiles);
+                break;
+            case SELECTION_TYPE.LINE:
+                const curSignX = startX - unit.position.x;
+                const curSignY = startY - unit.position.y;
+                const isHorizontal = curSignY == 0;
+                for (var i = 0; i <= selection.range; i++) {
+                    const dx = startX + (isHorizontal ? i * curSignX : 0);
+                    const dy = startY + (isHorizontal ? 0 : i * curSignY);
+                    const dist = Math.abs(x) + Math.abs(y);
+                    result.push(new FLOOD_FILL_TILE(dx, dy, false, dist));
                 }
-                result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
-            }
+                break;
+            case SELECTION_TYPE.SQUARE:
+                for (var y = -selection.range; y <= selection.range; y++) {
+                    for (var x = -selection.range; x <= selection.range; x++) {
+                        const dist = Math.abs(x) + Math.abs(y);
+                        result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
+                    }
+                }
+                break;
+            case SELECTION_TYPE.DIAMOND:
+                for (var y = -selection.range; y <= selection.range; y++) {
+                    for (var x = -selection.range; x <= selection.range; x++) {
+                        const dist = Math.abs(x) + Math.abs(y);
+                        if (dist > selection.range) {
+                            continue;
+                        }
+                        result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
+                    }
+                }
+                break;
         }
+        
         return result;
     }
     /**
      * Show Selection Tiles At Cursor
-     * @param {TacticalActionSelection} selection 
+     * @param {TacticalUnit} unit 
+     * @param {TacticalRange} range 
      * @param {string} bitmapName
      */
-    showSelectionTileAtCursor(selection, bitmapName = 'RedSquare') {
+    showSelectionTileAtCursor(unit, range, bitmapName = 'RedSquare') {
+        const selection = range.getSelection();
         const cursor = TacticalBattleSystem.inst().cursor;
-        const aoeTiles = this.calculateSelectionTiles(cursor.position.x, cursor.position.y, selection);
+        const aoeTiles = this.calculateSelectionTiles(unit, cursor.position.x, cursor.position.y, range);
         aoeTiles.forEach(tile => {
             let offsets = new Position(tile.x - cursor.position.x, tile.y - cursor.position.y);
             const rangeSprite = new Sprite_DynamicRange(cursor.sprite, offsets, bitmapName);
@@ -220,62 +252,7 @@ class TacticalRangeManager {
      * @returns {FLOOD_FILL_TILE[]}
      */
     calculateActionTargetPositionsByRange(unit, targetX, targetY, range) {
-        let affectPositions = [];
-        const attackTiles = TacticalRangeManager.inst().calculateActionTiles(unit.position.x, unit.position.y, range);
-        switch (range.selection.getType()) {
-            case SELECTION_TYPE.ALL:
-                affectPositions = affectPositions.concat(attackTiles);
-                break;
-            case SELECTION_TYPE.LINE:
-                const curSignX = targetX - unit.position.x;
-                const curSignY = targetY - unit.position.y;
-                // calculateSelectionTiles(startX, startY, selection)
-                const sameDirectionTiles = attackTiles.filter(tile => {
-                    if (tile.x == targetX && tile.y == targetY) return false;
-                    const signX = tile.x - unit.position.x;
-                    const signY = tile.y - unit.position.y;
-                    if (tile.y == targetY && curSignX * signX > 0) {
-                        return true;
-                    }
-                    if (tile.x == targetX && curSignY * signY > 0) {
-                        return true;
-                    }
-                    return false;
-                });
-                affectPositions = affectPositions.concat(sameDirectionTiles);
-                break;
-            default:
-                affectPositions.push(new FLOOD_FILL_TILE(targetX, targetY, false, 0));
-                break;
-        }
-        return affectPositions;
-
-        if (range.penerate && !range.diagonal) {
-
-            const curSignX = targetX - unit.position.x;
-            const curSignY = targetY - unit.position.y;
-
-            const attackTiles = TacticalRangeManager.inst().calculateActionTiles(unit.position.x, unit.position.y, range);
-            const sameDirectionTiles = attackTiles.filter(tile => {
-                if (tile.x == targetX && tile.y == targetY) return false;
-                const signX = tile.x - unit.position.x;
-                const signY = tile.y - unit.position.y;
-                if (tile.y == targetY && curSignX * signX > 0) {
-                    return true;
-                }
-                if (tile.x == targetX && curSignY * signY > 0) {
-                    return true;
-                }
-                return false;
-            });
-            affectPositions = affectPositions.concat(sameDirectionTiles);
-        }
-        if (range.selection) {
-            let aoeTiles = TacticalRangeManager.inst().calculateSelectionTiles(targetX, targetY, range.selection);
-            aoeTiles = aoeTiles.filter(tile => !(tile.x == targetX && tile.y == targetY));
-            affectPositions = affectPositions.concat(aoeTiles);
-        }
-        return affectPositions;
+        return this.calculateSelectionTiles(unit, targetX, targetY, range);
     }
 }
 

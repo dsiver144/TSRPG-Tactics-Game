@@ -31,7 +31,7 @@ class TacticalCursor {
         /**
          * @type {number} - the amount of frames that player need to press the button to move.
          */
-        this.moveDelayAmount = 4;
+        this.moveDelayAmount = 5;
         this.createCursorSprite();
     }
     /**
@@ -136,13 +136,18 @@ class TacticalCursor {
         if (!this.active) return;
         if (TacticalBattleSystem.inst().isBusy()) return;
         if (Input.dir4 != 0) {
+            console.log(this.moveDelay);
+
+            if (!this.canMove()) {
+                this.moveDelay -= 1;
+                console.log("H");
+                return;
+            }
+            this.moveDelay = this.moveDelayAmount;
             const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
             let blockMove = false;
             if (this.onDirectionalCallback) {
-                if (this.lastDir4 != Input.dir4) {
-                    blockMove = this.onDirectionalCallback(Input.dir4, x, y);
-                    this.lastDir4 = Input.dir4;
-                }
+                this.onDirectionalCallback(Input.dir4, this.position.x + x, this.position.y + y);
                 blockMove = this.directionalMoveBlocked;
             }
             if (blockMove) return;
@@ -175,7 +180,7 @@ class TacticalCursor {
      * @returns {boolean}
      */
     canMove() {
-        return this.moveDelay == 0;
+        return this.moveDelay <= 0;
     }
     /**
      * Move cursor by input
@@ -183,12 +188,13 @@ class TacticalCursor {
      * @param {number} dy 
      */
     moveByInput(dx, dy) {
-        if (this.canMove()) {
-            this.move(this.position.x + dx, this.position.y + dy);
-            this.moveDelay = this.moveDelayAmount;
-        } else {
-            this.moveDelay -= 1; 
-        }
+        this.move(this.position.x + dx, this.position.y + dy);
+        // if (this.canMove()) {
+        //     this.move(this.position.x + dx, this.position.y + dy);
+        //     this.moveDelay = this.moveDelayAmount;
+        // } else {
+        //     this.moveDelay -= 1; 
+        // }
     }
     /**
      * Set On OK Callback

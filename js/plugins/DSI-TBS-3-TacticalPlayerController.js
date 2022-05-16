@@ -117,7 +117,7 @@ class TacticalPlayerController extends TacticalUnitController {
 
         let actionTileImg = 'RedSquare';
         if (tbsSkill.range.selection) {
-            TacticalRangeManager.inst().showSelectionTileAtCursor(tbsSkill.range.selection);
+            TacticalRangeManager.inst().showSelectionTileAtCursor(tbsSkill.range);
             actionTileImg = 'BlueSquare';
         }
         TacticalRangeManager.inst().showActionTileSprites(unit, skillId, actionTileImg);

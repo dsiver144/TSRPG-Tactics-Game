@@ -110,6 +110,7 @@ class Sprite_StaticRange extends Sprite_StaticMapObject {
          * @type {TacticalUnit}
          */
         this.unit = null;
+        this.updatePosition();
     }
     /**
      * Screen Z
@@ -137,6 +138,7 @@ class Sprite_DynamicRange extends Sprite {
          */
         this.offset = offset;
         this.bitmap = ImageManager.loadTBS(bitmapName);
+        this.updatePosition();
     }
     /**
      * Update per frame.

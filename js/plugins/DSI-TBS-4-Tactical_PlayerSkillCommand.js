@@ -27,16 +27,19 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
 
         let actionTileImg = tbsSkill.getTileImage();
         if (tbsSkill.range.canShowSelection()) {
-            TacticalRangeManager.inst().showSelectionTileAtCursor(tbsSkill.range.aoe, actionTileImg);
+            TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, actionTileImg);
             actionTileImg = 'BlueSquare';
         }
         TacticalRangeManager.inst().showActionTileSprites(this.unit, this.skillId, actionTileImg);
         // Directional button callback
         this.cursor.setDirectionalCallback((direction, x, y) => {
+            TacticalRangeManager.inst().hideTileSprites(this.cursor);
+            console.log({x, y});
             if (!this.unit.canUseActionAt(x, y)) {
                 console.log("Cant use skill here");
                 return;
             }
+            TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, tbsSkill.getTileImage());
         }, !isSelectable);
         // OK Callback
         this.cursor.setOnOKCallback((x, y) => {

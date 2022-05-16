@@ -125,8 +125,8 @@ class TacticalRange {
      * @returns {boolean}
      */
     canShowSelection() {
-        if (this.selection && this.selection.getRange() == 0) return true;
-        return false;
+        if (this.selection && this.selection.getRange() == 0) return false;
+        return true;
     }
     /**
      * Check if player can select 
