@@ -76,18 +76,18 @@ class TacticalRangeManager {
         return result;
     }
     /**
-     * Calculate AOE Tiles
+     * Calculate Selection Tiles
      * @param {number} x 
      * @param {number} y 
-     * @param {TacticalAOERange} aoeRange 
+     * @param {TacticalActionSelection} selection 
      * @returns {FLOOD_FILL_TILE[]}
      */
-    calculateAOETiles(startX, startY, aoeRange) {
+    calculateSelectionTiles(startX, startY, selection) {
         const result = [];
-        for (var y = -aoeRange.range; y <= aoeRange.range; y++) {
-            for (var x = -aoeRange.range; x <= aoeRange.range; x++) {
+        for (var y = -selection.range; y <= selection.range; y++) {
+            for (var x = -selection.range; x <= selection.range; x++) {
                 const dist = Math.abs(x) + Math.abs(y);
-                if (aoeRange.shape === AOE_RANGE_SHAPE.DIAMOND && (dist > aoeRange.range)) {
+                if (selection.type === AOE_RANGE_SHAPE.DIAMOND && (dist > selection.range)) {
                     continue;
                 }
                 result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
@@ -96,13 +96,13 @@ class TacticalRangeManager {
         return result;
     }
     /**
-     * Show AOE Tiles At Cursor
-     * @param {TacticalAOERange} aoeRange 
+     * Show Selection Tiles At Cursor
+     * @param {TacticalActionSelection} selection 
      * @param {string} bitmapName
      */
-    showAOETilesAtCursor(aoeRange, bitmapName = 'RedSquare') {
+    showSelectionTileAtCursor(selection, bitmapName = 'RedSquare') {
         const cursor = TacticalBattleSystem.inst().cursor;
-        const aoeTiles = this.calculateAOETiles(cursor.position.x, cursor.position.y, aoeRange);
+        const aoeTiles = this.calculateSelectionTiles(cursor.position.x, cursor.position.y, selection);
         aoeTiles.forEach(tile => {
             let offsets = new Position(tile.x - cursor.position.x, tile.y - cursor.position.y);
             const rangeSprite = new Sprite_DynamicRange(cursor.sprite, offsets, bitmapName);
@@ -241,8 +241,8 @@ class TacticalRangeManager {
             });
             affectPositions = affectPositions.concat(sameDirectionTiles);
         }
-        if (range.aoe) {
-            let aoeTiles = TacticalRangeManager.inst().calculateAOETiles(targetX, targetY, range.aoe);
+        if (range.selection) {
+            let aoeTiles = TacticalRangeManager.inst().calculateSelectionTiles(targetX, targetY, range.selection);
             aoeTiles = aoeTiles.filter(tile => !(tile.x == targetX && tile.y == targetY));
             affectPositions = affectPositions.concat(aoeTiles);
         }

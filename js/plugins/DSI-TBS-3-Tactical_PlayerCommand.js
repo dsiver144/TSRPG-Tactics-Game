@@ -165,8 +165,8 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         this.commandWindow.visible = false;
 
         let actionTileImg = tbsSkill.getTileImage();
-        if (tbsSkill.range.aoe) {
-            TacticalRangeManager.inst().showAOETilesAtCursor(tbsSkill.range.aoe, actionTileImg);
+        if (tbsSkill.range.selection) {
+            TacticalRangeManager.inst().showSelectionTileAtCursor(tbsSkill.range.selection, actionTileImg);
             actionTileImg = 'BlueSquare';
         }
         TacticalRangeManager.inst().showActionTileSprites(this.unit, this.skillId, actionTileImg);

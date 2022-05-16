@@ -93,7 +93,7 @@ class TacticalUnit {
         const skill = $dataSkills[skillId];
         /** @type {TBS_SkillData} */
         const tbsSkill = skill.tbsSkill;
-        /** @type {TacticalRange} */
+        /** @type {string} */
         const sequences = tbsSkill.getSequences();
         /** @type {TacticalUnit[]} */
         const targets = this.getTargetsWhenUsingSkillAt(skillId, x, y);

@@ -7,6 +7,15 @@
     "SQUARE": 0,
     "DIAMOND": 1
 }
+/**
+ * @enum {number}
+ */
+const SELECTION_TYPE = {
+    "NONE": -1,
+    "ALL": 1,
+    "SQUARE": 1,
+    "DIAMOND": 2
+}
 
 /**
  * @private
@@ -24,7 +33,7 @@ class TacticalRange {
         this.max = max;
         this.diagonal = true;
         this.penerate = false;
-        this.aoe = null;
+        this.selection = null;
     }
     /**
      * Set Min
@@ -93,38 +102,39 @@ class TacticalRange {
     /**
      * Set AOE Range
      * @param {Number} range 
-     * @param {string} shape 
+     * @param {string} type 
+     * @param {string} extraParam
      * @returns 
      */
-    setAOE(range, shape) {
-        this.aoe = new TacticalAOERange();
-        console.log(shape, AOE_RANGE_SHAPE[shape]);
-        this.aoe.setRange(range).setShape(AOE_RANGE_SHAPE[shape]);
+    setSelection(type, range, extraParam) {
+        this.selection = new TacticalActionSelection();
+        console.log(type, SELECTION_TYPE[type]);
+        this.selection.setRange(range).setType(SELECTION_TYPE[type]).setExtraParam(extraParam);
         return this;
     }
     /**
-     * Get AOE Range
-     * @returns {TacticalAOERange}
+     * Get Selection
+     * @returns {TacticalActionSelection}
      */
-    getAOE() {
-        return this.aoe;
+    getSelection() {
+        return this.selection;
     }
 }
 
-class TacticalAOERange {
+class TacticalActionSelection {
     /**
      * Tacticle AOE Range
      * @property {Number} range
-     * @property {"Square | Diamond"} range
+     * @property {SELECTION_TYPE} shape
      */
     constructor() {
         this.range = 0;
-        this.shape = AOE_RANGE_SHAPE.NONE;
+        this.type = SELECTION_TYPE.NONE;
     }
     /**
-     * Set AOE Range.
+     * Set Selection Range.
      * @param {Number} range 
-     * @returns {TacticalAOERange}
+     * @returns {TacticalActionSelection}
      */
     setRange(range) {
         this.range = range;
@@ -138,20 +148,36 @@ class TacticalAOERange {
         return this.range;
     }
     /**
-     * Set AOE Shape
-     * @param {AOE_RANGE_SHAPE} shape 
-     * @returns {TacticalAOERange}
+     * Set selection type
+     * @param {SELECTION_TYPE} shape 
+     * @returns {TacticalActionSelection}
      */
-    setShape(shape) {
-        this.shape = shape;
+    setType(shape) {
+        this.type = shape;
         return this;
     }
     /**
      * Get AOE Range Shape
-     * @returns {AOE_RANGE_SHAPE}
+     * @returns {SELECTION_TYPE}
      */
-    getShape() {
-        return this.shape;
+    getType() {
+        return this.type;
+    }
+    /**
+     * Set Extra Param
+     * @param {string} param 
+     * @returns {TacticalActionSelection}
+     */
+    setExtraParam(param) {
+        this.extraParam = param;
+        return this;
+    }
+    /**
+     * Get Extra Param.
+     * @returns {string}
+     */
+    getExtraParam() {
+        return this.extraParam;
     }
 
 }
