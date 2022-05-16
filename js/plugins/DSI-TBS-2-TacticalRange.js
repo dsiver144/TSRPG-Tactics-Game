@@ -14,7 +14,8 @@ const SELECTION_TYPE = {
     "NONE": -1,
     "ALL": 1,
     "SQUARE": 1,
-    "DIAMOND": 2
+    "DIAMOND": 2,
+    "LINE": 3
 }
 
 /**
@@ -118,6 +119,22 @@ class TacticalRange {
      */
     getSelection() {
         return this.selection;
+    }
+    /**
+     * Check if can show selection on cursor.
+     * @returns {boolean}
+     */
+    canShowSelection() {
+        if (this.selection && this.selection.getRange() == 0) return true;
+        return false;
+    }
+    /**
+     * Check if player can select 
+     * @returns {boolean}
+     */
+    isSelectable() {
+        if (this.selection && this.selection.getType() == SELECTION_TYPE.ALL) return false;
+        return true;
     }
 }
 

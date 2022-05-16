@@ -220,7 +220,36 @@ class TacticalRangeManager {
      * @returns {FLOOD_FILL_TILE[]}
      */
     calculateActionTargetPositionsByRange(unit, targetX, targetY, range) {
-        let affectPositions = [new FLOOD_FILL_TILE(targetX, targetY, false, 0)];
+        let affectPositions = [];
+        const attackTiles = TacticalRangeManager.inst().calculateActionTiles(unit.position.x, unit.position.y, range);
+        switch (range.selection.getType()) {
+            case SELECTION_TYPE.ALL:
+                affectPositions = affectPositions.concat(attackTiles);
+                break;
+            case SELECTION_TYPE.LINE:
+                const curSignX = targetX - unit.position.x;
+                const curSignY = targetY - unit.position.y;
+                // calculateSelectionTiles(startX, startY, selection)
+                const sameDirectionTiles = attackTiles.filter(tile => {
+                    if (tile.x == targetX && tile.y == targetY) return false;
+                    const signX = tile.x - unit.position.x;
+                    const signY = tile.y - unit.position.y;
+                    if (tile.y == targetY && curSignX * signX > 0) {
+                        return true;
+                    }
+                    if (tile.x == targetX && curSignY * signY > 0) {
+                        return true;
+                    }
+                    return false;
+                });
+                affectPositions = affectPositions.concat(sameDirectionTiles);
+                break;
+            default:
+                affectPositions.push(new FLOOD_FILL_TILE(targetX, targetY, false, 0));
+                break;
+        }
+        return affectPositions;
+
         if (range.penerate && !range.diagonal) {
 
             const curSignX = targetX - unit.position.x;

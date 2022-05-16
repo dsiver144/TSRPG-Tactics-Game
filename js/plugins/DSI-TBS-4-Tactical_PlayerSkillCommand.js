@@ -8,7 +8,9 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         this.skillId = skillId;
         this.skillType = type;
     }
-
+    /**
+     * Start Action
+     */
     startAction() {
         const skillId = this.skillId;
         const skill = $dataSkills[skillId];
@@ -21,8 +23,10 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         this.cursor.activate();
         this.commandWindow.visible = false;
 
+        const isSelectable = tbsSkill.range.isSelectable();
+
         let actionTileImg = tbsSkill.getTileImage();
-        if (tbsSkill.range.aoe) {
+        if (tbsSkill.range.canShowSelection()) {
             TacticalRangeManager.inst().showSelectionTileAtCursor(tbsSkill.range.aoe, actionTileImg);
             actionTileImg = 'BlueSquare';
         }
@@ -33,12 +37,14 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
                 console.log("Cant use skill here");
                 return;
             }
-        }, false);
+        }, !isSelectable);
         // OK Callback
         this.cursor.setOnOKCallback((x, y) => {
-            if (!this.unit.canUseActionAt(x, y)) {
-                SoundManager.playBuzzer();
-                return;
+            if (isSelectable) {
+                if (!this.unit.canUseActionAt(x, y)) {
+                    SoundManager.playBuzzer();
+                    return;
+                }
             }
             this.onActionOK({ x, y });
         });
