@@ -35,6 +35,8 @@ class TacticalRange {
         this.diagonal = true;
         this.penerate = false;
         this.selection = null;
+
+        this.setSelection("DIAMOND", 0);
     }
     /**
      * Set Min
@@ -125,7 +127,7 @@ class TacticalRange {
      * @returns {boolean}
      */
     canShowSelection() {
-        if (this.selection && this.selection.getRange() == 0) return false;
+        if (this.selection && this.selection.getType() === SELECTION_TYPE.ALL) return false;
         return true;
     }
     /**

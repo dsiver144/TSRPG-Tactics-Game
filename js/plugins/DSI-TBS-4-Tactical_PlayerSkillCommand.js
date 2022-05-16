@@ -16,31 +16,37 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         const skill = $dataSkills[skillId];
         /** @type {TBS_SkillData} */
         const tbsSkill = skill.tbsSkill;
-
         this.battleSystem = TacticalBattleSystem.inst();
+        this.commandWindow.visible = false;
 
         this.cursor.show();
         this.cursor.activate();
-        this.commandWindow.visible = false;
+        this.cursor.clearAllCallbacks();
 
         const isSelectable = tbsSkill.range.isSelectable();
 
         let actionTileImg = tbsSkill.getTileImage();
+        let showSelection = tbsSkill.range.canShowSelection();
+        TacticalRangeManager.inst().showActionTileSprites(this.unit, this.skillId, showSelection ? "BlackSquare" : actionTileImg);
         if (tbsSkill.range.canShowSelection()) {
-            TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, actionTileImg);
-            actionTileImg = 'BlueSquare';
+            if (this.unit.canUseActionAt(this.cursor.position.x, this.cursor.position.y)) {
+                TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, actionTileImg);
+            }
         }
-        TacticalRangeManager.inst().showActionTileSprites(this.unit, this.skillId, actionTileImg);
         // Directional button callback
-        this.cursor.setDirectionalCallback((direction, x, y) => {
+        if (isSelectable) {
+            this.cursor.enableMoveInput();
+        } else {
+            this.cursor.disableMoveInput();
+        }
+        this.cursor.setOnPositionChangedCallback((x, y) => {
             TacticalRangeManager.inst().hideTileSprites(this.cursor);
-            console.log({x, y});
             if (!this.unit.canUseActionAt(x, y)) {
                 console.log("Cant use skill here");
                 return;
             }
             TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, tbsSkill.getTileImage());
-        }, !isSelectable);
+        });
         // OK Callback
         this.cursor.setOnOKCallback((x, y) => {
             if (isSelectable) {
@@ -56,8 +62,7 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
             TacticalRangeManager.inst().hideTileSprites(this.unit);
             TacticalRangeManager.inst().hideTileSprites(this.cursor);
 
-            onCancelCallback && onCancelCallback();
-            SoundManager.playCancel();
+            this.onActionCancel();
         });
     }
 
@@ -81,11 +86,12 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
     }
 
     onActionCancel() {
+        SoundManager.playCancel();
+
         this.cursor.deactivate();
-        this.cursor.hide();
         TacticalRangeManager.inst().hideTileSprites(this.unit);
         TacticalRangeManager.inst().hideTileSprites(this.cursor);
-
+        
         super.onActionCancel();
     }
 

@@ -5,6 +5,7 @@ class Tactical_PlayerInitCommand extends Tactical_PlayerCommand {
             this.onActionCancel();
             return;
         }
+        this.cursor.clearAllCallbacks();
         this.cursor.deactivate();
         this.commandWindow.refresh();
         this.commandWindow.visible = true;

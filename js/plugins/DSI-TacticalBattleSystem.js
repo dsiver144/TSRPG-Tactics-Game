@@ -407,6 +407,7 @@ window.TBS = window.TBS || {};
          */
         cursorOnPlayerTurn() {
             this.cursor.activate();
+            this.cursor.clearAllCallbacks();
             this.cursor.setOnOKCallback(this.cursorOnPlayerTurnCallback.bind(this));
         }
         /**

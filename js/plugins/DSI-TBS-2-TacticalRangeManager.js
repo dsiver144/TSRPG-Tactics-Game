@@ -96,10 +96,12 @@ class TacticalRangeManager {
                 const curSignY = startY - unit.position.y;
                 const isHorizontal = curSignY == 0;
                 for (var i = 0; i <= selection.range; i++) {
-                    const dx = startX + (isHorizontal ? i * curSignX : 0);
-                    const dy = startY + (isHorizontal ? 0 : i * curSignY);
+                    let signX = curSignX != 0 ? (curSignX > 0 ? 1 : -1) : 0;
+                    let signY = curSignY != 0 ? (curSignY > 0 ? 1 : -1) : 0;
+                    const x = (isHorizontal ? i * signX : 0);
+                    const y = (isHorizontal ? 0 : i * signY);
                     const dist = Math.abs(x) + Math.abs(y);
-                    result.push(new FLOOD_FILL_TILE(dx, dy, false, dist));
+                    result.push(new FLOOD_FILL_TILE(startX + x, startY + y, false, dist));
                 }
                 break;
             case SELECTION_TYPE.SQUARE:

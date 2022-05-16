@@ -31,7 +31,7 @@ class TacticalCursor {
         /**
          * @type {number} - the amount of frames that player need to press the button to move.
          */
-        this.moveDelayAmount = 5;
+        this.moveDelayAmount = 4;
         this.createCursorSprite();
     }
     /**
@@ -85,8 +85,10 @@ class TacticalCursor {
         y = Math.max(0, Math.min(y, $gameMap.height() - 1));
         this.position.x = x;
         this.position.y = y;
-
-        console.log(this.position);
+        if (this.onPositionChangedCallback) {
+            this.onPositionChangedCallback(x, y);
+        }
+        console.log("CUSOR POSITION", this.position);
     }
     /**
      * Screen X
@@ -136,19 +138,15 @@ class TacticalCursor {
         if (!this.active) return;
         if (TacticalBattleSystem.inst().isBusy()) return;
         if (Input.dir4 != 0) {
-            console.log(this.moveDelay);
-
             if (!this.canMove()) {
                 this.moveDelay -= 1;
-                console.log("H");
                 return;
             }
             this.moveDelay = this.moveDelayAmount;
             const [x, y] = this.getPositionOffsetByDirection(Input.dir4);
-            let blockMove = false;
+            let blockMove = this.directionalMoveBlocked;
             if (this.onDirectionalCallback) {
                 this.onDirectionalCallback(Input.dir4, this.position.x + x, this.position.y + y);
-                blockMove = this.directionalMoveBlocked;
             }
             if (blockMove) return;
             this.moveByInput(x, y);
@@ -156,6 +154,15 @@ class TacticalCursor {
         if (TouchInput.isTriggered()) {
             const x = $gameMap.canvasToMapX(TouchInput.x);
             const y = $gameMap.canvasToMapY(TouchInput.y);
+            if (x === this.position.x && y === this.position.y) {
+                TouchInput.update();
+                this.onOKCallback && this.onOKCallback(this.position.x, this.position.y);
+                return;
+            }
+            let blockMove = this.directionalMoveBlocked;
+            if (blockMove) {
+                return;
+            }
             this.move(x, y);
         }
         if (Input.isTriggered('ok')) {
@@ -189,12 +196,6 @@ class TacticalCursor {
      */
     moveByInput(dx, dy) {
         this.move(this.position.x + dx, this.position.y + dy);
-        // if (this.canMove()) {
-        //     this.move(this.position.x + dx, this.position.y + dy);
-        //     this.moveDelay = this.moveDelayAmount;
-        // } else {
-        //     this.moveDelay -= 1; 
-        // }
     }
     /**
      * Set On OK Callback
@@ -220,12 +221,35 @@ class TacticalCursor {
         this.directionalMoveBlocked = moveBlocked;
     }
     /**
+     * Block move input
+     * @param {boolean} v 
+     */
+    disableMoveInput() {
+        this.directionalMoveBlocked = true;
+    }
+    /**
+     * Block move input
+     * @param {boolean} v 
+     */
+    enableMoveInput() {
+        this.directionalMoveBlocked = false;
+    }
+    /**
+     * Set Position Change Callback
+     * @param {(x?: number, y?: number) => void} callback 
+     * @param {boolean} moveBlocked
+     */
+    setOnPositionChangedCallback(callback) {
+        this.onPositionChangedCallback = callback;
+    }
+    /**
      * Clear all callbacks
      */
     clearAllCallbacks() {
         this.onOKCallback = null;
         this.onCancelCallback = null;
         this.onDirectionalCallback = null;
+        this.onPositionChangedCallback = null;
         this.directionalMoveBlocked = false;
     }
     /**
@@ -236,15 +260,22 @@ class TacticalCursor {
         const valid = this.validActionPositions.some(position => this.position.x == position.x && this.position.y == position.y);
         return valid;
     }
-
+    /**
+     * Start Animation
+     */
     startAnimation() {
         this._animationPlaying = true;
     }
-
+    /**
+     * Is Animation Playing
+     * @returns {boolean}
+     */
     isAnimationPlaying() {
         return this._animationPlaying;
     }
-
+    /**
+     * End Animation
+     */
     endAnimation() {
         this._animationPlaying = false;
     }

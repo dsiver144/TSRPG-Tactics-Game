@@ -1,10 +1,12 @@
 class Tactical_PlayerMoveCommand extends Tactical_PlayerCommand {
 
     startAction() {
-        TacticalRangeManager.inst().showMoveTileSprites(this.unit);
-        this.cursor.activate();
-
         this.commandWindow.visible = false;
+
+        this.cursor.activate();
+        this.cursor.clearAllCallbacks();
+
+        TacticalRangeManager.inst().showMoveTileSprites(this.unit);
 
         this.cursor.setOnOKCallback((x, y) => {
             if (!this.unit.canMoveTo(x, y)) {
