@@ -26,7 +26,7 @@ class Window_TacticalUnitCommand extends Window_Command {
         // this.addCommand("Defend", 'defend', true);
         // this.addCommand("Skill", 'skill', true);
         // this.addCommand("Magic", 'skill', true);
-        // this.addCommand("Use Item", 'item', true);
+        this.addCommand("Use Item", 'item', true);
         this.addCommand("Wait", 'wait', true);
     }
 

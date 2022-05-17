@@ -9,6 +9,13 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         this.skillType = type;
     }
     /**
+     * Set Item
+     * @param {object} item 
+     */
+    setItem(item) {
+        this.item = item;
+    }
+    /**
      * Start Action
      */
     startAction() {
@@ -29,7 +36,7 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         let showSelection = tbsSkill.range.canShowSelection();
         TacticalRangeManager.inst().showActionTileSprites(this.unit, this.skillId, showSelection ? "BlackSquare" : actionTileImg);
         if (tbsSkill.range.canShowSelection()) {
-            if (this.unit.canUseActionAt(this.cursor.position.x, this.cursor.position.y)) {
+            if (this.unit.isInActionRange(this.cursor.position.x, this.cursor.position.y)) {
                 TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, actionTileImg);
             }
         }
@@ -41,8 +48,7 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         }
         this.cursor.setOnPositionChangedCallback((x, y) => {
             TacticalRangeManager.inst().hideTileSprites(this.cursor);
-            if (!this.unit.canUseActionAt(x, y)) {
-                console.log("Cant use skill here");
+            if (!this.unit.isInActionRange(x, y)) {
                 return;
             }
             TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range, tbsSkill.getTileImage());
@@ -50,7 +56,7 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         // OK Callback
         this.cursor.setOnOKCallback((x, y) => {
             if (isSelectable) {
-                if (!this.unit.canUseActionAt(x, y)) {
+                if (!this.unit.canUseActionAt(skillId, x, y)) {
                     SoundManager.playBuzzer();
                     return;
                 }
@@ -65,11 +71,14 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
             this.onActionCancel();
         });
     }
-
+    /**
+     * On Action OK
+     */
     onActionOK({ x, y }) {
-
+        this.cursor.clearAllCallbacks();
         this.cursor.deactivate();
         this.cursor.hide();
+
         TacticalRangeManager.inst().hideTileSprites(this.unit);
         TacticalRangeManager.inst().hideTileSprites(this.cursor);
 
@@ -78,7 +87,11 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
                 this.unit.attack(x, y);
                 break;
             case 'skill':
-                this.unit.useSkill(x, y);
+                this.unit.useSkill(this.skillId, x, y);
+                break;
+            case 'item':
+                this.unit.useSkill(this.skillId, x, y);
+                this.unit.useItem(this.item);
                 break;
         }
 
@@ -88,10 +101,12 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
     onActionCancel() {
         SoundManager.playCancel();
 
+        this.cursor.clearAllCallbacks();
         this.cursor.deactivate();
+
         TacticalRangeManager.inst().hideTileSprites(this.unit);
         TacticalRangeManager.inst().hideTileSprites(this.cursor);
-        
+
         super.onActionCancel();
     }
 

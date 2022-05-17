@@ -90,7 +90,9 @@ class TacticalPlayerController extends TacticalUnitController {
     }
 
     onItemCommand() {
-
+        const command = new Tactical_PlayerOpenWindowItemListCommand(this);
+        command.setItem($dataItems[1]);
+        this.pushCommand(command);
     }
 
     onWaitCommand() {
@@ -113,76 +115,6 @@ class TacticalPlayerController extends TacticalUnitController {
     onTurnEnd(onFinishCallback = null, onCancelCallback = null) {
         this.commandWindow.visible = false;
         this.chooseFaceDirection(onFinishCallback, onCancelCallback);
-    }
-    /**
-     * On Use Skill
-     * @param {number} skillId 
-     * @param {Function} onFinishCallback 
-     * @param {Function} onCancelCallback 
-     */65
-    onUseSkill(skillId, onFinishCallback = null, onCancelCallback = null) {
-        const skill = $dataSkills[skillId];
-        /** @type {TBS_SkillData} */
-        const tbsSkill = skill.tbsSkill;
-
-        const unit = this.unit;
-        const battleSystem = TacticalBattleSystem.inst();
-        const cursor = battleSystem.cursor;
-        cursor.activate();
-        this.commandWindow.visible = false;
-
-        let actionTileImg = 'RedSquare';
-        if (tbsSkill.range.selection) {
-            TacticalRangeManager.inst().showSelectionTileAtCursor(tbsSkill.range);
-            actionTileImg = 'BlueSquare';
-        }
-        TacticalRangeManager.inst().showActionTileSprites(unit, skillId, actionTileImg);
-        // Directional button callback
-        cursor.setDirectionalCallback((direction, x, y) => {
-            if (!unit.canUseActionAt(x, y)) {
-                console.log("Cant use skill here");
-                return;
-            }
-            return false;
-        }, false)
-        // OK Callback
-        cursor.setOnOKCallback((x, y) => {
-
-            if (!unit.canUseActionAt(x, y)) {
-                SoundManager.playBuzzer();
-                return;
-            }
-            
-            cursor.deactivate();
-            cursor.hide();
-            TacticalRangeManager.inst().hideTileSprites(unit);
-            TacticalRangeManager.inst().hideTileSprites(cursor);
-
-            unit.attack(x, y);
-
-            const waitToFinishInterval = setInterval(() => {
-                if (!battleSystem.isBusy()) {
-                    this.chooseFaceDirection(() => {
-                        unit.onActionEnd();
-                        cursor.show();
-                        cursor.activate();
-                        onFinishCallback && onFinishCallback();
-                    });
-                    clearInterval(waitToFinishInterval);
-                }
-            }, 1000/60);
-            
-        });
-        // Cancel Callback
-        cursor.setOnCancelCallback(() => {
-            TacticalRangeManager.inst().hideTileSprites(unit);
-            TacticalRangeManager.inst().hideTileSprites(cursor);
-
-            onCancelCallback && onCancelCallback();
-            SoundManager.playCancel();
-        })
-
-        this.commandWindow.visible = false;
     }
     /**
      * Choose face direction

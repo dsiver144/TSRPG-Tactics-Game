@@ -120,7 +120,6 @@ class TacticalUnit {
         const targetTypes = tbsSkill.getTargets();
         /** @type {FLOOD_FILL_TILE[]} */
         const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
-        console.log({targetedTiles});
         /** @type {TacticalUnit[]} */
         const targets = [];
         targetedTiles.forEach(tile => {
@@ -152,6 +151,12 @@ class TacticalUnit {
      */
     useItem(item) {
         this.battler.useItem(item);
+    }
+    /**
+     * Get Items
+     */
+    getItems() {
+        return $gameParty.items();
     }
     /**
      * Wait
@@ -204,11 +209,28 @@ class TacticalUnit {
     }
     /**
      * Can Use Action At
+     * @param {number} skillId
      * @param {number} x 
      * @param {number} y 
      * @returns {boolean}
      */
-    canUseActionAt(x, y) {
+    canUseActionAt(skillId, x, y) {
+        const inActionRange = this.isInActionRange(x, y);
+        if (inActionRange) {
+            const targets = this.getTargetsWhenUsingSkillAt(skillId, x, y);
+            if (targets.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * In Action Range
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {boolean}
+     */
+    isInActionRange(x, y) {
         return this.actionTiles.some(tile => tile.x == x && tile.y == y);
     }
     /**
