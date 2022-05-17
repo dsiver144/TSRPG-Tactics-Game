@@ -20,12 +20,13 @@ class Window_TacticalUnitCommand extends Window_Command {
      */
     makeCommandList() {
         if (!this.unit) return;
-        this.addCommand("Move", 'move', this.unit.isMoved == false);
+        const moveEnabled = this.unit.isMoved == false && !this.unit.hasActed();
+        this.addCommand("Move", 'move', moveEnabled);
         this.addCommand("Attack", 'attack', true);
-        this.addCommand("Defend", 'defend', true);
-        this.addCommand("Skill", 'skill', true);
-        this.addCommand("Magic", 'skill', true);
-        this.addCommand("Use Item", 'item', true);
+        // this.addCommand("Defend", 'defend', true);
+        // this.addCommand("Skill", 'skill', true);
+        // this.addCommand("Magic", 'skill', true);
+        // this.addCommand("Use Item", 'item', true);
         this.addCommand("Wait", 'wait', true);
     }
 

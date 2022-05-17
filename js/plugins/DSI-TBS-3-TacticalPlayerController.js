@@ -35,10 +35,20 @@ class TacticalPlayerController extends TacticalUnitController {
         }
     }
     /**
+     * Clear commands
+     */
+    clearCommands() {
+        this.playerCommands.splice(0, this.playerCommands.length);
+    }
+    /**
      * On Select
      */
     onSelect() {
-        // this.unit.move(this.unit.position.x + 1, this.unit.position.y);
+        if (this.unit.hasActed()) {
+            SoundManager.playBuzzer();
+            return;
+        }
+        
         this.commandWindow = TacticalBattleSystem.inst().actorUnitCommandWindow;
         this.commandWindow.setUnit(this.unit);
         this.cursor = TacticalBattleSystem.inst().cursor;
@@ -50,6 +60,12 @@ class TacticalPlayerController extends TacticalUnitController {
         this.commandWindow.setHandler('item', this.onItemCommand.bind(this));
         this.commandWindow.setHandler('wait', this.onWaitCommand.bind(this));
 
+        this.onInitCommand();
+    }
+    /**
+     * onInitCommand
+     */
+    onInitCommand() {
         this.pushCommand(new Tactical_PlayerInitCommand(this));
     }
     /**

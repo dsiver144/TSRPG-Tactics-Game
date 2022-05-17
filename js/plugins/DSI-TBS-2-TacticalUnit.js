@@ -161,12 +161,25 @@ class TacticalUnit {
     }
     /**
      * Move
+     * @param {number} x
+     * @param {number} y
      */
     move(x, y) {
         this.position.x = x;
         this.position.y = y;
         this.isMoved = true;
         this.moveSprite(x, y);
+    }
+    /**
+     * Set Position
+     */
+    setPosition(x, y) {
+        this.position.x = x;
+        this.position.y = y;
+        const character = this.getCharacter();
+        if (character) {
+            character.locate(x, y);
+        }
     }
     /**
      * On knockback
@@ -245,10 +258,17 @@ class TacticalUnit {
         return this.battlerSprite && this.battlerSprite._character.isAnimationPlaying();
     }
     /**
+     * Total Action Points
+     * @returns {number}
+     */
+    totalActionPoints() {
+        return 1;
+    }
+    /**
      * Refill action points
      */
     refillActionPoints() {
-        this.actionPoints = 1;
+        this.actionPoints = this.totalActionPoints();
     }
     /**
      * Check if this unit is busy
@@ -306,7 +326,8 @@ class TacticalUnit {
      */
     setFaceDirection(direction) {
         this.faceDirection = direction;
-        this.getCharacter().setDirection(direction);
+        const character = this.getCharacter();
+        character && character.setDirection(direction);
     }
     /**
      * Choose face direction.
@@ -424,9 +445,12 @@ class Tactical_AllyUnit extends TacticalUnit {
             this.battlerSprite._character.update();
         }
     }
-    
-    refillActionPoints() {
-        this.actionPoints = 2;
+    /**
+     * Total Action Points
+     * @returns {number}
+     */
+    totalActionPoints() {
+        return 1;
     }
     /**
      * Unit MOV

@@ -26,6 +26,7 @@ var $plugins =
 {"name":"DSI-TBS-3-TacticalBotController","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-4-Tactical_PlayerCommand","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-4-Tactical_PlayerInitCommand","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-4-Tactical_PlayerOpenCommandWindow","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-4-Tactical_PlayerMoveCommand","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-4-Tactical_PlayerSkillCommand","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-4-Tactical_PlayerWaitCommand","status":true,"description":"","parameters":{}},

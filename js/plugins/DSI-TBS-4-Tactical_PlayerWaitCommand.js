@@ -12,8 +12,8 @@ class Tactical_PlayerWaitCommand extends Tactical_PlayerCommand {
     onActionOK() {
         this.unit.wait();
         super.onActionOK();
-
-        this.controller.popCommand();
+        this.controller.clearCommands();
+        TacticalBattleSystem.inst().cursorOnPlayerTurn();
     }
 
     onActionCancel() {

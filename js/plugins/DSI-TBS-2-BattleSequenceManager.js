@@ -20,7 +20,6 @@ class TacticalSequenceManager {
         this.user = user;
         this.targets = targets;
         eval(sequences);
-        console.log("ACTIONS: ", this.actions);
         this.startNextAction();
     }
     /**

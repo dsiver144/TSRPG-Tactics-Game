@@ -107,9 +107,11 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
             return;
         if (this.unit.actionPoints > 1) {
             this.onActionEnd(false);
+            this.controller.onInitCommand();
         } else {
             this.controller.chooseFaceDirection(() => {
                 this.onActionEnd(false);
+                TacticalBattleSystem.inst().cursorOnPlayerTurn();
             });
         }
         this.waitForSkill = false;
@@ -118,9 +120,9 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
     onActionEnd(cancelled) {
         if (!cancelled) {
             this.unit.onActionEnd();
-            this.controller.popCommand();
+            this.controller.clearCommands();
         }
-        super.onActionEnd();
+        super.onActionEnd(cancelled);
     }
 
 }

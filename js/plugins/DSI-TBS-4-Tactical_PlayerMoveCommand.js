@@ -1,6 +1,14 @@
 class Tactical_PlayerMoveCommand extends Tactical_PlayerCommand {
 
     startAction() {
+        if (!this.lastUnitPosition) {
+            this.lastUnitPosition = new Position(this.unit.position.x, this.unit.position.y);
+            this.lastUnitDirection = this.unit.getFaceDirection();
+        }
+        this.unit.isMoved = false;
+        this.unit.setPosition(this.lastUnitPosition.x, this.lastUnitPosition.y);
+        this.unit.setFaceDirection(this.lastUnitDirection);
+
         this.commandWindow.visible = false;
 
         this.cursor.activate();
@@ -40,9 +48,20 @@ class Tactical_PlayerMoveCommand extends Tactical_PlayerCommand {
         if (this.unit.isBusy())
             return;
         this.waitForMovement = false;
+        this.onFinishMove();
         super.onActionOK();
+    }
 
-        this.controller.popCommand();
+    onFinishMove() {
+        /** @type {TacticalPlayerController} */
+        const controller = this.unit.controller;
+
+        const command = new Tactical_PlayerOpenWindowCommandListCommand(controller);
+        controller.pushCommand(command);
+
+        command.setOnCancelCallback(() => {
+            controller.popCommand();
+        });
     }
 
     onActionCancel() {
