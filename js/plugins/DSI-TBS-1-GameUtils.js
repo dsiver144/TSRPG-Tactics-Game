@@ -384,3 +384,20 @@ Scene_Boot.prototype.onDatabaseLoaded = function() {
     GameUtils.setupTBSSkills();
     GameUtils.setupTBSWeapons();
 };
+
+var DSI_TBS_1_GameUtils_Scene_Boot_loadSystemImages = Scene_Boot.prototype.loadSystemImages;
+Scene_Boot.prototype.loadSystemImages = function() {
+    DSI_TBS_1_GameUtils_Scene_Boot_loadSystemImages.call(this);
+    this.preloadTBS();
+};
+
+Scene_Boot.prototype.preloadTBS = function() {
+    ImageManager.loadTBS("RedSquare");
+    ImageManager.loadTBS("BlueSquare");
+    ImageManager.loadTBS("BlackSquare");
+    ImageManager.loadTBS("GreenSquare");
+    ImageManager.loadTBS("cursor");
+    ImageManager.loadTBS("PlayerTurn");
+    ImageManager.loadTBS("EnemyTurn");
+    ImageManager.loadTBS("BattleStart");
+};
