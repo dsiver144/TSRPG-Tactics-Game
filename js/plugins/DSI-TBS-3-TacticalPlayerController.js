@@ -74,84 +74,86 @@ class TacticalPlayerController extends TacticalUnitController {
     onMoveCommand() {
         this.pushCommand(new Tactical_PlayerMoveCommand(this));
     }
-
+    /**
+     * On Attack Command
+     */
     onAttackCommand() {
         const command = new Tactical_PlayerSkillCommand(this);
         command.setSkill(this.unit.attackSkillId(), 'attack');
         this.pushCommand(command);
     }
-
+    /**
+     * On Defend Command
+     */
     onDefendCommand() {
-
+        const command = new Tactical_PlayerSkillCommand(this);
+        command.setSkill(this.unit.defendSkillId(), 'defend');
+        this.pushCommand(command);
     }
-
+    /**
+     * On Skill Command
+     */
     onSkillCommand() {
-
+        const skillType = this.commandWindow.currentExt();
+        console.log(skillType);
+        const command = new Tactical_PlayerOpenWindowSkillListCommand(this);
+        command.setStypeId(skillType);
+        this.pushCommand(command);
     }
-
+    /**
+     * On Item Command
+     */
     onItemCommand() {
         const command = new Tactical_PlayerOpenWindowItemListCommand(this);
         this.pushCommand(command);
     }
-
+    /**
+     * On Wait Command
+     */
     onWaitCommand() {
         this.pushCommand(new Tactical_PlayerWaitCommand(this));
-        // const cursor = TacticalBattleSystem.inst().cursor;
-        // this.commandWindow.visible = false;
-        // this.chooseFaceDirection(() => {
-        //     this.unit.wait();
-        // }, () => {
-        //     this.commandWindow.visible = true;
-        //     cursor.deactivate();
-        //     this.activate();
-        // })
     }
     /**
-     * On Turn End
-     * @param {Function} onFinishCallback
-     * @param {Function} onCancelCallback
+     * Choose Face Direction For Unit
+     * @param {boolean} canBeCancelled 
+     * @returns {Promise<"ok"|"cancel">}
      */
-    onTurnEnd(onFinishCallback = null, onCancelCallback = null) {
-        this.commandWindow.visible = false;
-        this.chooseFaceDirection(onFinishCallback, onCancelCallback);
-    }
-    /**
-     * Choose face direction
-     * @param {Function} onFinishCallback
-     * @param {Function} onCancelCallback
-     */
-    chooseFaceDirection(onFinishCallback, onCancelCallback) {
-        this.unit.chooseFaceDirecion(true);
+    chooseFaceDirectionForUnit(canBeCancelled) {
+        return new Promise((resolve, reject) => {
 
-        const cursor = TacticalBattleSystem.inst().cursor;
+            this.unit.setFaceChoosingStatus(true);
 
-        cursor.activate();
-        cursor.move(this.unit.position.x, this.unit.position.y);
-        cursor.show();
+            const cursor = TacticalBattleSystem.inst().cursor;
 
-        cursor.clearAllCallbacks();
-        cursor.setDirectionalCallback((direction) => {
-            SoundManager.playCursor();
+            TacticalBattleSystem.inst().unitDirectionIndicatorSprite.setUnit(this.unit);
 
-            this.unit.setFaceDirection(direction);
-            return false;
-        }, true)
-        cursor.setOnOKCallback(() => {
-            SoundManager.playOk();
+            cursor.activate();
+            cursor.move(this.unit.position.x, this.unit.position.y);
+            cursor.show();
 
-            this.unit.chooseFaceDirecion(false);
-            cursor.deactivate();
-            onFinishCallback && onFinishCallback();
-        })
-        if (onCancelCallback) {
-            cursor.setOnCancelCallback(() => {
-                SoundManager.playCancel();
+            cursor.clearAllCallbacks();
+            cursor.setDirectionalCallback((direction) => {
+                SoundManager.playCursor();
 
-                this.unit.chooseFaceDirecion(false);
-                cursor.clearAllCallbacks();
-                onCancelCallback();
+                this.unit.setFaceDirection(direction);
+                return false;
+            }, true)
+            cursor.setOnOKCallback(() => {
+                SoundManager.playOk();
+                this.unit.setFaceChoosingStatus(false);
+                cursor.deactivate();
+                resolve('ok');
             })
-        }
+            if (canBeCancelled) {
+                cursor.setOnCancelCallback(() => {
+                    SoundManager.playCancel();
+
+                    this.unit.setFaceChoosingStatus(false);
+                    cursor.clearAllCallbacks();
+                    resolve('cancel');
+                })
+            }
+        })
     }
 }
 

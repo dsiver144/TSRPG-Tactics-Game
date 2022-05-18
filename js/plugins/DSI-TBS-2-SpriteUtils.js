@@ -212,6 +212,8 @@ class Sprite_UnitDirectionIndicator extends Sprite_StaticMapObject {
     setUnit(unit) {
         this.unit = unit;
         this.customPosition = this.unit.position;
+        this.currentDirection = this.unit.getFaceDirection();
+        this.refresh();
     }
     /**
      * Clear Unit

@@ -2,10 +2,13 @@ class Tactical_PlayerWaitCommand extends Tactical_PlayerCommand {
 
     startAction() {
         this.commandWindow.visible = false;
-        this.controller.chooseFaceDirection(() => {
-            this.onActionOK();
-        }, () => {
-            this.onActionCancel();
+        this.controller.chooseFaceDirectionForUnit(true).then((result) => {
+            if (result === 'ok') {
+                this.onActionOK();
+            } else {
+                this.onActionCancel();
+
+            }
         });
     }
 

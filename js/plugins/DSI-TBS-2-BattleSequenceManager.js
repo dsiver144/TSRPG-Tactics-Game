@@ -274,6 +274,7 @@ class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
         const addedBuffs = result.addedBuffs;
         const addedDebuffs = result.addedDebuffs;
         const removedBuffs = result.removedBuffs;
+        console.log("Action result: ", result);
     }
     /**
      * Check if this action is finish or not.

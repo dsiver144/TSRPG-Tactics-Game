@@ -136,6 +136,7 @@ class TacticalRange {
      */
     isSelectable() {
         if (this.selection && this.selection.getType() == SELECTION_TYPE.ALL) return false;
+        if (this.selection && this.selection.getRange() == 0) return false;
         return true;
     }
 }

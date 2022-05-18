@@ -253,7 +253,7 @@ window.TBS = window.TBS || {};
                 this.cursor.deactivate();
 
                 const unit = this.actorPreviewSprite.tempUnit;
-                unit.chooseFaceDirecion(true);
+                unit.setFaceChoosingStatus(true);
                 this.unitDirectionIndicatorSprite.setUnit(unit);
 
                 this.actorPreviewSprite.enableInput(
@@ -428,7 +428,6 @@ window.TBS = window.TBS || {};
                 return;
             };
             if (selectedUnit.teamId === 0) {
-                this.unitDirectionIndicatorSprite.setUnit(selectedUnit);
                 selectedUnit.controller.onSelect();
             } else {
                 console.log("Select enemy: ", selectedUnit);

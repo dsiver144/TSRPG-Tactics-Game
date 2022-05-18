@@ -29,6 +29,7 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
         this.cursor.show();
         this.cursor.activate();
         this.cursor.clearAllCallbacks();
+        this.cursor.move(this.unit.position.x, this.unit.position.y);
 
         const isSelectable = tbsSkill.range.isSelectable();
 
@@ -86,6 +87,9 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
             case 'attack':
                 this.unit.attack(x, y);
                 break;
+            case 'defend':
+                this.unit.defend(x, y);
+                break;
             case 'skill':
                 this.unit.useSkill(this.skillId, x, y);
                 break;
@@ -124,7 +128,7 @@ class Tactical_PlayerSkillCommand extends Tactical_PlayerCommand {
             this.onActionEnd(false);
             this.controller.onInitCommand();
         } else {
-            this.controller.chooseFaceDirection(() => {
+            this.controller.chooseFaceDirectionForUnit(false).then(() => {
                 this.onActionEnd(false);
                 TacticalBattleSystem.inst().cursorOnPlayerTurn();
             });

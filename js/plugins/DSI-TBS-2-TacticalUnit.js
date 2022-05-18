@@ -79,8 +79,8 @@ class TacticalUnit {
     /**
      * Defend
      */
-    defend() {
-
+    defend(x, y) {
+        this.useSkill(this.defendSkillId(), x, y);
     }
     /**
      * Use Skill
@@ -248,6 +248,13 @@ class TacticalUnit {
         return 0;
     }
     /**
+     * Defend skill id
+     * @returns {number}
+     */
+    defendSkillId() {
+        return 2;
+    }
+    /**
      * Attack Range
      * @returns {number}
      */
@@ -355,7 +362,7 @@ class TacticalUnit {
      * Choose face direction.
      * @param {boolean} v
      */
-    chooseFaceDirecion(v) {
+    setFaceChoosingStatus(v) {
         this.isFaceDirectionChoosing = v;
     }
     /**
