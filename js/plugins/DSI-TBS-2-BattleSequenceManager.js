@@ -185,7 +185,7 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
     }
     /**
      * Get Target
-     * @returns {object}
+     * @returns {Game_Character | TacticalCursor}
      */
     getTarget() {
         return this.subject.getCharacter();
