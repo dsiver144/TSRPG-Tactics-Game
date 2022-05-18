@@ -91,7 +91,6 @@ class TacticalPlayerController extends TacticalUnitController {
 
     onItemCommand() {
         const command = new Tactical_PlayerOpenWindowItemListCommand(this);
-        command.setItem($dataItems[1]);
         this.pushCommand(command);
     }
 

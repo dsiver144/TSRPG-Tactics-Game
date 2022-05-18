@@ -33,13 +33,6 @@ class Tactical_PlayerOpenWindowCommandListCommand extends Tactical_PlayerCommand
 
 class Tactical_PlayerOpenWindowItemListCommand extends Tactical_PlayerCommand {
     /**
-     * Set Item
-     * @param {object} item 
-     */
-    setItem(item) {
-        this.item = item;
-    }
-    /**
      * Start Action
      */
     startAction() {
@@ -72,11 +65,12 @@ class Tactical_PlayerOpenWindowItemListCommand extends Tactical_PlayerCommand {
      */
     onItemOK() {
         const item = this.listWindow.currentExt();
-        console.log({item});
-
+        /** @type {TBS_ItemData} */
+        const tbsItem = item.tbsItem;
+        
         const command = new Tactical_PlayerSkillCommand(this.controller);
-        command.setSkill(10, 'item');
-        command.setItem(this.item);
+        command.setSkill(tbsItem.skillId, 'item');
+        command.setItem(item);
 
         this.controller.pushCommand(command);
 

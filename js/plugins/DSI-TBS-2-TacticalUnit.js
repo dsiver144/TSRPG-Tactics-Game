@@ -136,7 +136,7 @@ class TacticalUnit {
      */
     forceAction(skillId) {
         this.battler.forceAction(skillId, 0);
-        this.useItem(this.currentAction().item());
+        this.battler.useItem(this.battler.currentAction().item());
     }
     /**
      * Get current action.
