@@ -79,8 +79,8 @@ class TacticalUnit {
     /**
      * Defend
      */
-    defend() {
-
+    defend(x, y) {
+        this.useSkill(this.defendSkillId(), x, y);
     }
     /**
      * Use Skill
@@ -120,7 +120,6 @@ class TacticalUnit {
         const targetTypes = tbsSkill.getTargets();
         /** @type {FLOOD_FILL_TILE[]} */
         const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
-        console.log({targetedTiles});
         /** @type {TacticalUnit[]} */
         const targets = [];
         targetedTiles.forEach(tile => {
@@ -137,7 +136,7 @@ class TacticalUnit {
      */
     forceAction(skillId) {
         this.battler.forceAction(skillId, 0);
-        this.useItem(this.currentAction().item());
+        this.battler.useItem(this.battler.currentAction().item());
     }
     /**
      * Get current action.
@@ -154,6 +153,12 @@ class TacticalUnit {
         this.battler.useItem(item);
     }
     /**
+     * Get Items
+     */
+    getItems() {
+        return $gameParty.items();
+    }
+    /**
      * Wait
      */
     wait() {
@@ -161,12 +166,25 @@ class TacticalUnit {
     }
     /**
      * Move
+     * @param {number} x
+     * @param {number} y
      */
     move(x, y) {
         this.position.x = x;
         this.position.y = y;
         this.isMoved = true;
         this.moveSprite(x, y);
+    }
+    /**
+     * Set Position
+     */
+    setPosition(x, y) {
+        this.position.x = x;
+        this.position.y = y;
+        const character = this.getCharacter();
+        if (character) {
+            character.locate(x, y);
+        }
     }
     /**
      * On knockback
@@ -191,11 +209,28 @@ class TacticalUnit {
     }
     /**
      * Can Use Action At
+     * @param {number} skillId
      * @param {number} x 
      * @param {number} y 
      * @returns {boolean}
      */
-    canUseActionAt(x, y) {
+    canUseActionAt(skillId, x, y) {
+        const inActionRange = this.isInActionRange(x, y);
+        if (inActionRange) {
+            const targets = this.getTargetsWhenUsingSkillAt(skillId, x, y);
+            if (targets.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * In Action Range
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {boolean}
+     */
+    isInActionRange(x, y) {
         return this.actionTiles.some(tile => tile.x == x && tile.y == y);
     }
     /**
@@ -211,6 +246,13 @@ class TacticalUnit {
      */
     attackSkillId() {
         return 0;
+    }
+    /**
+     * Defend skill id
+     * @returns {number}
+     */
+    defendSkillId() {
+        return 2;
     }
     /**
      * Attack Range
@@ -245,10 +287,17 @@ class TacticalUnit {
         return this.battlerSprite && this.battlerSprite._character.isAnimationPlaying();
     }
     /**
+     * Total Action Points
+     * @returns {number}
+     */
+    totalActionPoints() {
+        return 1;
+    }
+    /**
      * Refill action points
      */
     refillActionPoints() {
-        this.actionPoints = 1;
+        this.actionPoints = this.totalActionPoints();
     }
     /**
      * Check if this unit is busy
@@ -306,13 +355,23 @@ class TacticalUnit {
      */
     setFaceDirection(direction) {
         this.faceDirection = direction;
-        this.getCharacter().setDirection(direction);
+        const character = this.getCharacter();
+        character && character.setDirection(direction);
     }
     /**
-     * Choose face direction.
+     * Update face direction base on current character direction
+     * @returns {number}
+     */
+    updateFaceDirection() {
+        const character = this.getCharacter();
+        if (!character) return;
+        this.setFaceDirection(character.direction());
+    } 
+    /**
+     * Choose face direction status
      * @param {boolean} v
      */
-    chooseFaceDirecion(v) {
+    setFaceChoosingStatus(v) {
         this.isFaceDirectionChoosing = v;
     }
     /**
@@ -424,9 +483,12 @@ class Tactical_AllyUnit extends TacticalUnit {
             this.battlerSprite._character.update();
         }
     }
-    
-    refillActionPoints() {
-        this.actionPoints = 2;
+    /**
+     * Total Action Points
+     * @returns {number}
+     */
+    totalActionPoints() {
+        return 1;
     }
     /**
      * Unit MOV

@@ -1,3 +1,11 @@
+const TacticalSpriteConfig = {
+    "UNIT_SELECTION_Z": 9,
+    "STATIC_OBJECT_Z": 0,
+    "ALLY_SPOT_Z": 0,
+    "STATIC_RANGE_Z": 0,
+    "DYNAMIC_RANGE_Z": 5,
+    "DIRECTION_INDICATOR_Z": 10,
+}
 class Sprite_OnMapObject extends Sprite {
     /**
      * Update per frame
@@ -75,7 +83,7 @@ class Sprite_StaticMapObject extends Sprite_OnMapObject {
      * @returns {number}
      */
     screenZ() {
-        return 0;
+        return TacticalSpriteConfig.STATIC_OBJECT_Z;
     }
 }
 
@@ -93,7 +101,7 @@ class Sprite_AllySpot extends Sprite_StaticMapObject {
      * @returns {number}
      */
     screenZ() {
-        return 0;
+        return TacticalSpriteConfig.ALLY_SPOT_Z;
     }
 
 }
@@ -117,7 +125,7 @@ class Sprite_StaticRange extends Sprite_StaticMapObject {
      * @returns {number}
      */
     screenZ() {
-        return 0;
+        return TacticalSpriteConfig.STATIC_RANGE_Z;
     }
 }
 
@@ -168,7 +176,7 @@ class Sprite_DynamicRange extends Sprite {
     updatePosition() {
         this.x = this.target.x + this.offset.x * $gameMap.tileWidth();
         this.y = this.target.y + this.offset.y * $gameMap.tileHeight();
-        this.z = 5;
+        this.z = TacticalSpriteConfig.DYNAMIC_RANGE_Z;
     }
 }
 
@@ -204,6 +212,15 @@ class Sprite_UnitDirectionIndicator extends Sprite_StaticMapObject {
     setUnit(unit) {
         this.unit = unit;
         this.customPosition = this.unit.position;
+        this.currentDirection = this.unit.getFaceDirection();
+        this.refresh();
+    }
+    /**
+     * Clear Unit
+     */
+    clearUnit() {
+        this.unit = null;
+        this.visible = false;
     }
     /**
      * Refresh
@@ -238,7 +255,7 @@ class Sprite_UnitDirectionIndicator extends Sprite_StaticMapObject {
      * @returns {number}
      */
     screenZ() {
-        return 10;
+        return TacticalSpriteConfig.DIRECTION_INDICATOR_Z;
     }
     /**
      * Update direction

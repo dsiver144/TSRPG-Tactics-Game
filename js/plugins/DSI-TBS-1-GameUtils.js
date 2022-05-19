@@ -179,6 +179,17 @@ GameUtils.setupTBSWeapons = function() {
     })
 }
 /**
+ * Setup TBS Items
+ */
+ GameUtils.setupTBSItems = function() {
+    $dataItems.forEach((item, index) => {
+        if (!item) return;
+        const lines = item.note.split(/[\r\n]+/i);
+        const itemData = GameUtils.parseItemData(lines);
+        item.tbsItem = itemData;
+    })
+}
+/**
  * Parse Skill Data From Note
  * @param {string[]} lines 
  * @returns {TBS_SkillData}
@@ -221,8 +232,8 @@ GameUtils.setupTBSWeapons = function() {
                 const targets = RegExp.$1.split(",").map(s => s.trim());
                 skillData.setTargets(targets);
             }
-            if (line.match(/tileImage:\s*(.+)/i)) {
-                skillData.setTileImage = RegExp.$1.trim();
+            if (line.match(/^tileImage:\s*(\w+)/i)) {
+                skillData.setTileImage(RegExp.$1.trim());
             }
         }
     })
@@ -280,6 +291,35 @@ GameUtils.setupTBSWeapons = function() {
         }
     })
     return weaponData;
+}
+/**
+ * Parse Item Data From Note
+ * @param {string[]} lines 
+ * @returns {TBS_ItemData}
+ */
+ GameUtils.parseItemData = function(lines) {
+    /**
+     * @type {TBS_ItemData}
+     */
+    let itemData = null;
+    let readNotetag = false;
+    lines.forEach(line => {
+        if (line.match(/<tbs item>/i)) {
+            readNotetag = true;
+            itemData = new TBS_ItemData();
+            return;
+        }
+        if (line.match(/<\/tbs item>/i)) {
+            readNotetag = false;
+            return;
+        }
+        if (readNotetag) {
+            if (line.match(/^skill:\s*(\d+)/i)) {
+                itemData.setSkill(Number(RegExp.$1));
+            }
+        }
+    })
+    return itemData;
 }
 
 {/* <tbs skill>
@@ -383,4 +423,22 @@ Scene_Boot.prototype.onDatabaseLoaded = function() {
     GameUtils.setupTBSEnemies();
     GameUtils.setupTBSSkills();
     GameUtils.setupTBSWeapons();
+    GameUtils.setupTBSItems();
+};
+
+var DSI_TBS_1_GameUtils_Scene_Boot_loadSystemImages = Scene_Boot.prototype.loadSystemImages;
+Scene_Boot.prototype.loadSystemImages = function() {
+    DSI_TBS_1_GameUtils_Scene_Boot_loadSystemImages.call(this);
+    this.preloadTBS();
+};
+
+Scene_Boot.prototype.preloadTBS = function() {
+    ImageManager.loadTBS("RedSquare");
+    ImageManager.loadTBS("BlueSquare");
+    ImageManager.loadTBS("BlackSquare");
+    ImageManager.loadTBS("GreenSquare");
+    ImageManager.loadTBS("cursor");
+    ImageManager.loadTBS("PlayerTurn");
+    ImageManager.loadTBS("EnemyTurn");
+    ImageManager.loadTBS("BattleStart");
 };

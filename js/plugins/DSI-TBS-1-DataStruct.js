@@ -92,3 +92,18 @@ class TBS_WeaponData {
     }
 
 }
+
+class TBS_ItemData {
+    
+    constructor() {
+        this.skillId = 0;
+    }
+    /**
+     * Set skill
+     * @param {number} id 
+     */
+    setSkill(id) {
+        this.skillId = id;
+    }
+
+}

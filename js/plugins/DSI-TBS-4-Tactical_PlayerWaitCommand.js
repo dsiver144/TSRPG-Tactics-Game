@@ -1,24 +1,31 @@
 class Tactical_PlayerWaitCommand extends Tactical_PlayerCommand {
 
     startAction() {
+        this.lastUnitDirection = this.unit.getFaceDirection();
+        
         this.commandWindow.visible = false;
-        this.controller.chooseFaceDirection(() => {
-            this.onActionOK();
-        }, () => {
-            this.onActionCancel();
+        this.controller.chooseFaceDirectionForUnit(true).then((result) => {
+            if (result === 'ok') {
+                this.onActionOK();
+            } else {
+                this.onActionCancel();
+
+            }
         });
     }
 
     onActionOK() {
         this.unit.wait();
         super.onActionOK();
-
-        this.controller.popCommand();
+        this.controller.clearCommands();
+        TacticalBattleSystem.inst().cursorOnPlayerTurn();
     }
 
     onActionCancel() {
         this.cursor.deactivate();
         super.onActionCancel();
+
+        this.unit.setFaceDirection(this.lastUnitDirection);
     }
 
 }

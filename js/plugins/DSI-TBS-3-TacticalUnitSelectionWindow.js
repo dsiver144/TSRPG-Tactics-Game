@@ -51,6 +51,7 @@ class Window_TacticalUnitSelectionList extends Window_Command {
         const battleSystem = TacticalBattleSystem.inst();
         battleSystem.actorPreviewSprite.setImage(actor.characterName(), actor.characterIndex());
         battleSystem.actorPreviewSprite.visible = true;
+
         battleSystem.cursor.activate();
 
         this.refresh();

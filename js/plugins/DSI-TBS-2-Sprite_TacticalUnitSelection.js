@@ -3,6 +3,9 @@ class Sprite_TacticalUnitSelection extends Sprite_Character {
         var character = new Game_CharacterBase();
         character.setImage("0", 0);
         super(character);
+        /** @type {TacticalUnit} */
+        this.tempUnit = new TacticalUnit(0, new Position(0, 0));
+        this.tempUnit.setFaceDirection(character.direction());
     }
     /**
      * Set character image
@@ -30,11 +33,14 @@ class Sprite_TacticalUnitSelection extends Sprite_Character {
      * Update position
      */
     updatePosition() {
+        const cursor = TacticalBattleSystem.inst().cursor;
         const tw = $gameMap.tileWidth();
         const th = $gameMap.tileHeight();
-        this.x = TacticalBattleSystem.inst().cursor.screenX() + tw / 2;
-        this.y = TacticalBattleSystem.inst().cursor.screenY() + th;
-        this.z = 100;
+        this.x = cursor.screenX() + tw / 2;
+        this.y = cursor.screenY() + th;
+        this.z = TacticalSpriteConfig.UNIT_SELECTION_Z;
+        this.tempUnit.position.x = cursor.position.x;
+        this.tempUnit.position.y = cursor.position.y;
     }
     /**
      * Update input
@@ -53,6 +59,7 @@ class Sprite_TacticalUnitSelection extends Sprite_Character {
         }
         if (Input.dir4 != 0) {
             this._character.setDirection(Input.dir4);
+            this.tempUnit.setFaceDirection(Input.dir4);
         }
     }
     /**

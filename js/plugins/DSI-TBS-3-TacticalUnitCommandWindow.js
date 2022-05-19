@@ -20,11 +20,18 @@ class Window_TacticalUnitCommand extends Window_Command {
      */
     makeCommandList() {
         if (!this.unit) return;
-        this.addCommand("Move", 'move', this.unit.isMoved == false);
+        /** @type {Game_Actor} */
+        const actor = this.unit.battler;
+
+        const moveEnabled = this.unit.isMoved == false && !this.unit.hasActed();
+        this.addCommand("Move", 'move', moveEnabled);
         this.addCommand("Attack", 'attack', true);
+        const skillTypes = actor.skillTypes();
+        for (const stypeId of skillTypes) {
+            const name = $dataSystem.skillTypes[stypeId];
+            this.addCommand(name, "skill", true, stypeId);
+        }
         this.addCommand("Defend", 'defend', true);
-        this.addCommand("Skill", 'skill', true);
-        this.addCommand("Magic", 'skill', true);
         this.addCommand("Use Item", 'item', true);
         this.addCommand("Wait", 'wait', true);
     }

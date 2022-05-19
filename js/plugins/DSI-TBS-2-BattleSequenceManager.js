@@ -20,7 +20,6 @@ class TacticalSequenceManager {
         this.user = user;
         this.targets = targets;
         eval(sequences);
-        console.log("ACTIONS: ", this.actions);
         this.startNextAction();
     }
     /**
@@ -186,7 +185,7 @@ class TacticalSequencePlayAnimAction extends TacticalSequenceAction {
     }
     /**
      * Get Target
-     * @returns {object}
+     * @returns {Game_Character | TacticalCursor}
      */
     getTarget() {
         return this.subject.getCharacter();
@@ -275,6 +274,7 @@ class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
         const addedBuffs = result.addedBuffs;
         const addedDebuffs = result.addedDebuffs;
         const removedBuffs = result.removedBuffs;
+        console.log("Action result: ", result);
     }
     /**
      * Check if this action is finish or not.
