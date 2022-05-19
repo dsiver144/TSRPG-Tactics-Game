@@ -1,6 +1,8 @@
 class Tactical_PlayerWaitCommand extends Tactical_PlayerCommand {
 
     startAction() {
+        this.lastUnitDirection = this.unit.getFaceDirection();
+        
         this.commandWindow.visible = false;
         this.controller.chooseFaceDirectionForUnit(true).then((result) => {
             if (result === 'ok') {
@@ -22,6 +24,8 @@ class Tactical_PlayerWaitCommand extends Tactical_PlayerCommand {
     onActionCancel() {
         this.cursor.deactivate();
         super.onActionCancel();
+
+        this.unit.setFaceDirection(this.lastUnitDirection);
     }
 
 }

@@ -359,7 +359,16 @@ class TacticalUnit {
         character && character.setDirection(direction);
     }
     /**
-     * Choose face direction.
+     * Update face direction base on current character direction
+     * @returns {number}
+     */
+    updateFaceDirection() {
+        const character = this.getCharacter();
+        if (!character) return;
+        this.setFaceDirection(character.direction());
+    } 
+    /**
+     * Choose face direction status
      * @param {boolean} v
      */
     setFaceChoosingStatus(v) {

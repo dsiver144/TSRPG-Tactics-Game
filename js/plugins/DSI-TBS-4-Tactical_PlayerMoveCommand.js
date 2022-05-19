@@ -59,6 +59,8 @@ class Tactical_PlayerMoveCommand extends Tactical_PlayerCommand {
         const command = new Tactical_PlayerOpenWindowCommandListCommand(controller);
         controller.pushCommand(command);
 
+        this.unit.updateFaceDirection();
+
         command.setOnCancelCallback(() => {
             controller.popCommand();
         });
