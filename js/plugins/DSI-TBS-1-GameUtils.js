@@ -353,6 +353,16 @@ GameUtils.setCameraTarget = function(target) {
     $gameMap.camTargetSet(target);
 }
 
+/**
+ * Distance between two positions
+ * @param {Position} positionA 
+ * @param {Position} positionB 
+ * @returns 
+ */
+GameUtils.distance = function(positionA, positionB) {
+    return Math.abs(positionA.x - positionB.x) + Math.abs(positionA.y - positionB.y);
+}
+
 GameUtils.addSpriteToTilemap = function(sprite, addToCharacters = false) {
     const spriteset = SceneManager._scene._spriteset;
     spriteset._tilemap.addChild(sprite);

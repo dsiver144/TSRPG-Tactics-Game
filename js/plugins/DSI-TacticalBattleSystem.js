@@ -430,8 +430,9 @@ window.TBS = window.TBS || {};
             if (selectedUnit.teamId === 0) {
                 selectedUnit.controller.onSelect();
             } else {
-                console.log("Select enemy: ", selectedUnit);
-                TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
+                // console.log("Select enemy: ", selectedUnit);
+                // TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
+                selectedUnit.controller.onSelect();
             }
         }
         /**

@@ -9,7 +9,6 @@ class Tactical_PlayerWaitCommand extends Tactical_PlayerCommand {
                 this.onActionOK();
             } else {
                 this.onActionCancel();
-
             }
         });
     }
