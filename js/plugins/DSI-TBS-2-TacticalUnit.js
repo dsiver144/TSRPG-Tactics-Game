@@ -382,6 +382,24 @@ class TacticalUnit {
         return !!this.isFaceDirectionChoosing;
     }
     /**
+     * Get Unit Vulnerable Position.
+     * @returns {Position}
+     */
+    vulnerablePosition() {
+        const position = {...this.position};
+        switch (this.faceDirection) {
+            case 2:
+                position.y -= 1; break;
+            case 8:
+                position.y += 1; break;
+            case 4:
+                position.x += 1; break;
+            case 6:
+                position.x -= 1; break;
+        }
+        return position;
+    }
+    /**
      * Turn toward point
      * @param {number} x 
      * @param {number} y 

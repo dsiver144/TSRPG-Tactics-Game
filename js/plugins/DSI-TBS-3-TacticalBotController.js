@@ -19,7 +19,32 @@ class TacticalBotController extends TacticalUnitController {
             return distA - distB;
         });
 
+        const skill = $dataSkills[this.unit.attackSkillId()];
+        /** @type {TBS_SkillData} */
+        const tbsSkill = skill.tbsSkill;
+
         const closestUnit = oppositeUnitsByDistance[0];
+        const vulnerablePosition = closestUnit.vulnerablePosition();
+
+        const distanceToClosestUnit = GameUtils.distance(closestUnit.position, this.unit.position);
+
+        const moveableTiles = TacticalRangeManager.inst().calculateMovableTiles(this.unit.position.x, this.unit.position.y, this.unit.moveRange());
+        TacticalRangeManager.inst().showMoveTileSprites(this.unit);
+
+        let attackable = false;
+
+        console.log(moveableTiles);
+
+        moveableTiles.forEach(tile => {
+            const distToTarget = GameUtils.distance(closestUnit.position, tile);
+            if (distToTarget >= tbsSkill.range.getMin() && distToTarget <= tbsSkill.range.getMax()) {
+                console.log(distToTarget, tbsSkill.range, closestUnit.position, tile);
+                this.unit.getCharacter()._through = true;
+                this.unit.move(tile.x, tile.y);
+                return;
+            }
+        })
+
         console.log({battleStyle, unit, oppositeUnitsByDistance, closestUnit});
         // const 
     }

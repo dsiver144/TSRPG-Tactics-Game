@@ -193,11 +193,12 @@
 	var DSI_Astar_Game_CharacterBase_updateStop = Game_CharacterBase.prototype.updateStop;
     Game_Character.prototype.updateStop = function() {
 		DSI_Astar_Game_CharacterBase_updateStop.call(this); 
-        if (this.hasPath()) {
+        if (this.hasPath() && !this.isMoving()) {
             const point = this.pathResult.shift();
             var direction = this.getDirectionFromAToB({x: this.x, y: this.y}, point);
             if (direction > 0) {
                 this.moveStraight(direction);
+                console.log({point, direction});
             }
         }
     };

@@ -7387,6 +7387,7 @@ Game_CharacterBase.prototype.moveStraight = function(d) {
         this._realY = $gameMap.yWithDirection(this._y, this.reverseDir(d));
         this.increaseSteps();
     } else {
+        console.log("Not success", this._x, this._y);
         this.setDirection(d);
         this.checkEventTriggerTouchFront(d);
     }
