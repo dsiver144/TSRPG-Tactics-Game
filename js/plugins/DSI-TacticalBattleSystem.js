@@ -368,7 +368,16 @@ window.TBS = window.TBS || {};
          */
         onBattleStart() {
             this.showPhaseTextSprite("BattleStart");
+            this.clearAllyStartingPositionEvents();
             this.setActiveTeam(0);
+        }
+        /**
+         * Clear Ally Starting Position
+         */
+        clearAllyStartingPositionEvents() {
+            this.allyStartPositions.forEach(e => {
+                e.erase();
+            })
         }
         /**
          * Set Active Team
@@ -430,8 +439,9 @@ window.TBS = window.TBS || {};
             if (selectedUnit.teamId === 0) {
                 selectedUnit.controller.onSelect();
             } else {
-                console.log("Select enemy: ", selectedUnit);
-                TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
+                // console.log("Select enemy: ", selectedUnit);
+                // TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
+                selectedUnit.controller.onSelect();
             }
         }
         /**

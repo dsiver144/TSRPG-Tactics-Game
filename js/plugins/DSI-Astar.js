@@ -138,7 +138,9 @@
         this.clearFindPath();
         const eventMarker = $gameMap.generateEventMap();
         this.pathResult = easyAStar((x, y)=>{
-            if (customBlockCondition && customBlockCondition(x, y)) return false;
+            if (customBlockCondition && customBlockCondition(x, y)) {
+                return false;
+            }
             if (eventMarker[`${x}-${y}`]) return false;
             if (map[y] && map[y][x] === 0) {
                 return true; 
@@ -146,6 +148,7 @@
                 return false;
             }
         }, {x: startX, y: startY}, {x: endX, y: endY});
+        console.log(this.pathResult);
     }
 
     Game_Character.prototype.clearFindPath = function() {
@@ -193,11 +196,12 @@
 	var DSI_Astar_Game_CharacterBase_updateStop = Game_CharacterBase.prototype.updateStop;
     Game_Character.prototype.updateStop = function() {
 		DSI_Astar_Game_CharacterBase_updateStop.call(this); 
-        if (this.hasPath()) {
+        if (this.hasPath() && !this.isMoving()) {
             const point = this.pathResult.shift();
             var direction = this.getDirectionFromAToB({x: this.x, y: this.y}, point);
             if (direction > 0) {
                 this.moveStraight(direction);
+                console.log({point, direction});
             }
         }
     };

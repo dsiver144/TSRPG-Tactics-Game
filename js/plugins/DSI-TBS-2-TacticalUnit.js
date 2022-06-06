@@ -67,6 +67,16 @@ class TacticalUnit {
      */
     update() {
         this.controller.update();
+        this.updateMoving();
+    }
+    /**
+     * Update moving
+     */
+    updateMoving() {
+        if (!this.onFinishMoveCB) return;
+        if (this.isMoving()) return;
+        this.onFinishMoveCB();
+        this.onFinishMoveCB = null;
     }
     /**
      * Attack
@@ -168,11 +178,13 @@ class TacticalUnit {
      * Move
      * @param {number} x
      * @param {number} y
+     * @param {Function} onFinishMoveCB
      */
-    move(x, y) {
+    move(x, y, onFinishMoveCB = null) {
         this.position.x = x;
         this.position.y = y;
         this.isMoved = true;
+        this.onFinishMoveCB = onFinishMoveCB;
         this.moveSprite(x, y);
     }
     /**
@@ -267,11 +279,13 @@ class TacticalUnit {
      * @param {number} y 
      */
     moveSprite(x, y) {
-        this.battlerSprite._character.findpathToEx(x, y);
-        // this.battlerSprite._character.findpathToEx(x, y, (x, y) => {
-        //     if (!!TacticalUnitManager.inst().getUnitAt(x, y)) return false;
-        //     return true;
-        // });
+        // this.battlerSprite._character.findpathToEx(x, y);
+        const unitMap = TacticalUnitManager.inst().getUnitMap();
+        this.battlerSprite._character.findpathToEx(x, y, (x, y) => {
+            if (x == this.position.x && y == this.position.y) return false;
+            if (!!unitMap.get(x, y)) return true;
+            return false;
+        });
     }
     /**
      * Check if the sprite is moving
@@ -380,6 +394,24 @@ class TacticalUnit {
      */
     isChoosingFaceDirection() {
         return !!this.isFaceDirectionChoosing;
+    }
+    /**
+     * Get Unit Vulnerable Position.
+     * @returns {Position}
+     */
+    vulnerablePosition() {
+        const position = {...this.position};
+        switch (this.faceDirection) {
+            case 2:
+                position.y -= 1; break;
+            case 8:
+                position.y += 1; break;
+            case 4:
+                position.x += 1; break;
+            case 6:
+                position.x -= 1; break;
+        }
+        return position;
     }
     /**
      * Turn toward point
