@@ -1,3 +1,5 @@
+const BOT_DELAY = 200;
+
 class TacticalBotController extends TacticalUnitController {
     /**
      * TacticalBotController
@@ -14,6 +16,7 @@ class TacticalBotController extends TacticalUnitController {
 
         const unit = this.unit;
         const battleStyle = 'agressive';
+        const allyUnits = TacticalUnitManager.inst().getAllyTeam(this.unit);
         const oppositeUnits = TacticalUnitManager.inst().getOppositeTeam(this.unit);
         const oppositeUnitsByDistance = oppositeUnits.sort((a, b) => {
             const distA = GameUtils.distance(a.position, this.unit.position);//Math.abs(this.unit.position.x - a.position.x) + Math.abs(this.unit.position.y - a.position.y);
@@ -35,8 +38,31 @@ class TacticalBotController extends TacticalUnitController {
         if (distanceToClosestUnit >= tbsSkill.range.getMin() && distanceToClosestUnit <= tbsSkill.range.getMax()) {
             // When bot is already in attack range.
             attackable = true;
-            this.calculateAllPossibleActionPosition(tbsSkill);
-            return;
+            const actionPosition = this.calculateBestActionPosition(tbsSkill, allyUnits, oppositeUnits);
+            if (actionPosition) {
+                let actionTileImg = tbsSkill.getTileImage();
+                let showSelection = tbsSkill.range.canShowSelection();
+                TacticalRangeManager.inst().showActionTileSprites(this.unit, skill.id, showSelection ? "BlackSquare" : actionTileImg);
+                TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range);
+                setTimeout(() => {
+                    setTimeout(() => {
+                        cursor.move(actionPosition.x, actionPosition.y);
+                        setTimeout(() => {
+                            this.unit.useSkill(skill.id, actionPosition.x, actionPosition.y);
+                            TacticalRangeManager.inst().hideTileSprites(cursor);
+                            TacticalRangeManager.inst().hideTileSprites(this.unit);
+                        }, BOT_DELAY);
+                    }, BOT_DELAY);
+                }, BOT_DELAY);
+                return;
+            }
+            
+            // let targets = [];
+            // // let minTarget = 
+            // actionPositions.forEach(positionData => {
+                
+            // })
+            // return;
         }
 
         const moveableTiles = TacticalRangeManager.inst().calculateMovableTiles(this.unit.position.x, this.unit.position.y, this.unit.moveRange());
@@ -75,9 +101,9 @@ class TacticalBotController extends TacticalUnitController {
             cursor.move(destinateTile.x, destinateTile.y);
             TacticalRangeManager.inst().hideTileSprites(this.unit);
             this.unit.move(destinateTile.x, destinateTile.y, () => {
-
+                
             });
-        }, 500);
+        }, BOT_DELAY);
         // this.unit.move(destinateTile.x, destinateTile.y, () => {
         //     TacticalRangeManager.inst().hideTileSprites(this.unit);
         // });
@@ -108,16 +134,61 @@ class TacticalBotController extends TacticalUnitController {
             result.push(new TBS_PossibleActionPosition(unitX, unitY, targetPositions, false));
 
         }
-        console.log(result);
         return result
+    }
+    /**
+     * Calculate Best Action Position
+     * @param {TBS_SkillData} tbsSkill 
+     * @param {TacticalUnit[]} allyUnits
+     * @param {TacticalUnit[]} oppositeUnits
+     * @returns {TBS_PossibleActionPosition}
+     */
+    calculateBestActionPosition(tbsSkill, allyUnits, oppositeUnits) {
+        const positions = this.calculateAllPossibleActionPosition(tbsSkill);
+        /** @type {TacticalUnit[]} */
+        let targets = [];
+        if (tbsSkill.getTargets().includes(TBS_TARGET_TYPE.ally)) {
+            targets = targets.concat(allyUnits);
+        }
+        if (tbsSkill.getTargets().includes(TBS_TARGET_TYPE.enemy)) {
+            targets = targets.concat(oppositeUnits);
+        }
+        if (tbsSkill.getTargets().includes(TBS_TARGET_TYPE.user)) {
+            targets.push(this.unit);
+        }
+        const targetMap = new TBS_UnitMap();
+        targets.forEach(u => targetMap.set(u.position.x, u.position.y, u));
+
+        let maxTargetNumber = 0;
+        /** @type {TBS_PossibleActionPosition} */
+        let result = null;
+        positions.forEach(positionData => {
+            let targetNumber = 0;
+            const tiles = positionData.tiles;
+            tiles.forEach(tile => {
+                if (targetMap.get(tile.x, tile.y)) {
+                    targetNumber += 1;
+                }
+            })
+            if (targetNumber > maxTargetNumber) {
+                result = positionData;
+                maxTargetNumber = targetNumber;
+            }
+        })
+        return result;
+        // tbsSkill.getTargets().includes()
     }
 }
 
 class TBS_PossibleActionPosition {
     constructor(x, y, tiles, selectable) {
+        /** @type {number} */
         this.x = x;
-        this.y = x;
+        /** @type {number} */
+        this.y = y;
+        /** @type {FLOOD_FILL_TILE[]} */
         this.tiles = tiles;
+        /** @type {boolean} */
         this.selectable = selectable;
     }
 }

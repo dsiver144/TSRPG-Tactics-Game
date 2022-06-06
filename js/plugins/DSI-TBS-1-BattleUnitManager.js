@@ -21,7 +21,7 @@ class TacticalUnitManager {
      * Get All Unit of the same team.
      * @param {TacticalUnit} unit 
      */
-    getUnitTeam(unit) {
+    getAllyTeam(unit) {
         const teamId = unit.teamId;
         return teamId === 0 ? this.allyUnits : this.enemyUnits;
     }

@@ -7,6 +7,7 @@ var $plugins =
 {"name":"GALV_CamControlMZ","status":true,"description":"(v.1.7) Allows greater control over where the game camera is focused. View documentation for plugin commands.","parameters":{"useZoom":"true","bZoom":"1"}},
 {"name":"DSI-Astar","status":true,"description":"(v1.0) A star pathfind plugin by dsiver144","parameters":{}},
 {"name":"DSI-TBS-1-DataStruct","status":true,"description":"","parameters":{}},
+{"name":"DSI-TBS-1-EngineOverwrite","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-1-GameUtils","status":true,"description":"(v1.0) A custom plugin by dsiver144","parameters":{"testParam:number":"144"}},
 {"name":"DSI-TBS-1-BattleUnitManager","status":true,"description":"","parameters":{}},
 {"name":"DSI-TBS-2-BattleSequenceManager","status":true,"description":"","parameters":{}},

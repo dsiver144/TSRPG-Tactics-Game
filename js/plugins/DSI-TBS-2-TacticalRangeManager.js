@@ -181,7 +181,7 @@ class TacticalRangeManager {
      */
     showMoveTileSprites(unit) {
         // Calculate and show moveable tiles
-        const unitTeamMembers = TacticalUnitManager.inst().getUnitTeam(unit);
+        const unitTeamMembers = TacticalUnitManager.inst().getAllyTeam(unit);
         let movableTiles = this.calculateMovableTiles(unit.position.x, unit.position.y, unit.moveRange());
         unit.movableTiles = movableTiles;
         let attackTiles = this.calculateAttackTilesFromMoveableTiles(unit.position.x, unit.position.y, unit.attackRange(), movableTiles);
