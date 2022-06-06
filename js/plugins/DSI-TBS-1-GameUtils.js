@@ -235,6 +235,9 @@ GameUtils.setupTBSWeapons = function() {
             if (line.match(/^tileImage:\s*(\w+)/i)) {
                 skillData.setTileImage(RegExp.$1.trim());
             }
+            if (line.match(/^critical:\s*(true|false)/i)) {
+                skillData.setCritical(RegExp.$1 === 'true');
+            }
         }
     })
     return skillData;

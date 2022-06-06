@@ -131,12 +131,30 @@ class TacticalUnit {
         /** @type {FLOOD_FILL_TILE[]} */
         const targetedTiles = TacticalRangeManager.inst().calculateActionTargetPositionsByRange(this, x, y, range);
         /** @type {TacticalUnit[]} */
-        const targets = [];
+        let targets = [];
+        const unitMap = TacticalUnitManager.inst().getUnitMap();
         targetedTiles.forEach(tile => {
-            const unit = TacticalUnitManager.inst().getUnitAt(tile.x, tile.y);
+            const unit = unitMap.get(tile.x, tile.y);
             if (unit) {
                 targets.push(unit);
             }
+        })
+        // Filter unit
+        const isTargetAlly = tbsSkill.getTargets().includes(TBS_TARGET_TYPE.ally);
+        const isTargetEnemy = tbsSkill.getTargets().includes(TBS_TARGET_TYPE.enemy);
+        const isTargetSelf = tbsSkill.getTargets().includes(TBS_TARGET_TYPE.user);
+        targets = targets.filter(unit => {
+            let result = false;
+            if (isTargetAlly && unit.teamId == this.teamId) {
+                result = true;
+            }
+            if (isTargetEnemy && unit.teamId != this.teamId) {
+                result = true;
+            }
+            if (isTargetSelf && unit == this) {
+                result = true;
+            }
+            return result;
         })
         return targets;
     }

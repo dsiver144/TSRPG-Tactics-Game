@@ -32,6 +32,7 @@ class TBS_SkillData {
         /** @private */
         this.sequences = null;
         this.tileImg = 'RedSquare';
+        this.canBeCritical = false;
     }
     /**
      * Set Targets
@@ -74,6 +75,20 @@ class TBS_SkillData {
      */
     getTileImage() {
         return this.tileImg;
+    }
+    /**
+     * Set Critical
+     * @param {boolean} v 
+     */
+    setCritical(v) {
+        this.canBeCritical = v;
+    }
+    /**
+     * Get Critical
+     * @returns {boolean}
+     */
+    getCritical() {
+        return this.canBeCritical;
     }
 
 }
