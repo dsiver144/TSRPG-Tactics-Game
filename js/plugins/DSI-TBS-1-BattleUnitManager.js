@@ -43,6 +43,17 @@ class TacticalUnitManager {
         return this.allyUnits.concat(this.enemyUnits).filter(unit => unit.position.x === x && unit.position.y === y)[0];
     }
     /**
+     * Get Unit Map
+     * @returns {TBS_UnitMap}
+     */
+    getUnitMap() {
+        const map = new TBS_UnitMap();
+        this.allyUnits.concat(this.enemyUnits).forEach(u => {
+            map.set(u.position.x, u.position.y, u);
+        })
+        return map;
+    }
+    /**
      * Add Ally Unit
      * @param {TacticalUnit} unit 
      */
@@ -84,4 +95,31 @@ class TacticalUnitManager {
     }
     TacticalUnitManager.instance = new TacticalUnitManager();
     return TacticalUnitManager.instance;
+}
+
+class TBS_UnitMap {
+    /**
+     * TBS_UnitMap
+     */
+    constructor() {
+        this.map = {};
+    }
+    /**
+     * Set
+     * @param {number} x 
+     * @param {number} y 
+     * @param {TacticalUnit} unit 
+     */
+    set(x, y, unit) {
+        this.map[`${x}-${y}`] = unit;
+    }
+    /**
+     * Get
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {TacticalUnit}
+     */
+    get(x, y) {
+        return this.map[`${x}-${y}`];
+    }
 }

@@ -138,7 +138,9 @@
         this.clearFindPath();
         const eventMarker = $gameMap.generateEventMap();
         this.pathResult = easyAStar((x, y)=>{
-            if (customBlockCondition && customBlockCondition(x, y)) return false;
+            if (customBlockCondition && customBlockCondition(x, y)) {
+                return false;
+            }
             if (eventMarker[`${x}-${y}`]) return false;
             if (map[y] && map[y][x] === 0) {
                 return true; 
@@ -146,6 +148,7 @@
                 return false;
             }
         }, {x: startX, y: startY}, {x: endX, y: endY});
+        console.log(this.pathResult);
     }
 
     Game_Character.prototype.clearFindPath = function() {

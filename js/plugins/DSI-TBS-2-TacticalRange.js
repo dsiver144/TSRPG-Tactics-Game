@@ -111,7 +111,6 @@ class TacticalRange {
      */
     setSelection(type, range, extraParam) {
         this.selection = new TacticalActionSelection();
-        console.log(type, SELECTION_TYPE[type]);
         this.selection.setRange(range).setType(SELECTION_TYPE[type]).setExtraParam(extraParam);
         return this;
     }

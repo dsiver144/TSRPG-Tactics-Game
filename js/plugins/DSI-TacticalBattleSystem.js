@@ -368,7 +368,16 @@ window.TBS = window.TBS || {};
          */
         onBattleStart() {
             this.showPhaseTextSprite("BattleStart");
+            this.clearAllyStartingPositionEvents();
             this.setActiveTeam(0);
+        }
+        /**
+         * Clear Ally Starting Position
+         */
+        clearAllyStartingPositionEvents() {
+            this.allyStartPositions.forEach(e => {
+                e.erase();
+            })
         }
         /**
          * Set Active Team
