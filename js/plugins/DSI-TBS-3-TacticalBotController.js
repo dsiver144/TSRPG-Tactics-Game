@@ -56,13 +56,14 @@ class TacticalBotController extends TacticalUnitController {
             } 
         }
         await this.checkMove(skill, closestUnit);
-
         distanceToClosestUnit = GameUtils.distance(closestUnit.position, unit.position);
         isInRangeToUseSkillToClosestTarget = distanceToClosestUnit >= tbsSkill.range.getMin() && distanceToClosestUnit <= tbsSkill.range.getMax();
         if (isInRangeToUseSkillToClosestTarget) {
             // When bot is already in attack range.
             await this.checkUseAction(skill, allyUnits, oppositeUnits);
+            return;
         }
+        this.unit.onActionEnd();
     }
     /**
      * checkUseAction
