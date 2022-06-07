@@ -193,6 +193,7 @@ window.TBS = window.TBS || {};
          * Update battle phase
          */
         updatePhase() {
+            console.log("BUSY", this.isBusy());
             if (this.isBusy()) return;
             switch(this.currentPhase) {
             case 'selectUnit':
@@ -496,14 +497,16 @@ window.TBS = window.TBS || {};
          */
         updateEnemyTurn() {
             if (this.currentEnemyUnit && !this.currentEnemyUnit.isBusy()) {
+                // Update select next unit.
                 if (this.currentEnemyUnit.actionPoints == 0) {
-                    this.currentEnemyUnit = TacticalUnitManager.inst().enemyUnits.filter(unit => unit.actionPoints > 0)[0];
-                    this.currentEnemyUnit && this.currentEnemyUnit.controller.onSelect();
+                    this.currentEnemyUnit = null;
+                    setTimeout(() => {
+                        this.currentEnemyUnit = TacticalUnitManager.inst().enemyUnits.filter(unit => unit.actionPoints > 0)[0];
+                        this.currentEnemyUnit && this.currentEnemyUnit.controller.onSelect();
+                    }, 500);
                 }
             }
             const isAllPlayerFinished = TacticalUnitManager.inst().enemyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
-            // console.log(this.currentEnemyUnit && this.currentEnemyUnit.isBusy(), isAllPlayerFinished, TacticalUnitManager.inst().enemyUnits.filter(u => u.isBusy()));
-
             if (isAllPlayerFinished) {
                 this.onEnemyTurnEnd();
             }

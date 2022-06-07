@@ -70,7 +70,6 @@ class TacticalSequenceManager {
         this.actionIndex += 1;
         const action = this.actions[this.actionIndex];
         action && action.onStart();
-        console.log("Start action", action);
     }
     /**
      * Update sequences.
@@ -80,9 +79,11 @@ class TacticalSequenceManager {
         let finishCount = 0;
         this.actions.forEach(action => {
             action.update();
-            if (action.isFinished()) finishCount += 1;
+            if (action.isFinished()) {
+                finishCount += 1;
+            }
         });
-        if (finishCount === this.actions.length) {
+        if (finishCount >= this.actions.length) {
             this.reset();
         }
     }
@@ -249,6 +250,7 @@ class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
     setBattleAction(action, target) {
         this.battleAction = action;
         this.target = target;
+        this.actionFinished = false;
     }
     /**
      * On Start
@@ -275,13 +277,14 @@ class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
         const addedDebuffs = result.addedDebuffs;
         const removedBuffs = result.removedBuffs;
         console.log("Action result: ", result);
+        this.actionFinished = true;
     }
     /**
      * Check if this action is finish or not.
      * @returns {boolean}
      */
     isFinished() {
-        return true;
+        return this.actionFinished;
     }
 }
 

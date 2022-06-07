@@ -20,7 +20,10 @@ class TacticalBotController extends TacticalUnitController {
      */
     async onBotTurn() {
         this.cursor = TacticalBattleSystem.inst().cursor;
+
         const unit = this.unit;
+        this.cursor.move(unit.position.x, unit.position.y);
+
 
         const skill = $dataSkills[unit.attackSkillId()];
         /** @type {TBS_SkillData} */
@@ -60,7 +63,6 @@ class TacticalBotController extends TacticalUnitController {
             // When bot is already in attack range.
             await this.checkUseAction(skill, allyUnits, oppositeUnits);
         }
-        this.unit.onActionEnd();
     }
     /**
      * checkUseAction
@@ -91,6 +93,8 @@ class TacticalBotController extends TacticalUnitController {
         TacticalRangeManager.inst().hideTileSprites(this.cursor);
         TacticalRangeManager.inst().hideTileSprites(this.unit);
         this.cursor.setOnPositionChangedCallback(null);
+        
+        this.unit.onActionEnd();
     }
     /**
      * Check move
