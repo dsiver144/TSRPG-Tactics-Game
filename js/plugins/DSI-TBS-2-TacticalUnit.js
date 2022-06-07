@@ -432,6 +432,20 @@ class TacticalUnit {
         return position;
     }
     /**
+     * Check critical position
+     * @param {number} x 
+     * @param {number} y 
+     */
+    checkCriticalPosition(x, y) {
+        const resultCheck = {
+            2: y < this.position.y,
+            4: x > this.position.x,
+            6: x < this.position.x,
+            8: y > this.position.y
+        }
+        return resultCheck[this.faceDirection];
+    }
+    /**
      * Turn toward point
      * @param {number} x 
      * @param {number} y 

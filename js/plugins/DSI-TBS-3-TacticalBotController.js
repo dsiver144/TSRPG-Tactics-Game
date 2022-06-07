@@ -118,13 +118,13 @@ class TacticalBotController extends TacticalUnitController {
     }
 
     async onBotTurn() {
-        const cursor = TacticalBattleSystem.inst().cursor;
+        this.cursor = TacticalBattleSystem.inst().cursor;
+        const unit = this.unit;
 
         const skill = $dataSkills[unit.attackSkillId()];
         /** @type {TBS_SkillData} */
         const tbsSkill = skill.tbsSkill;
 
-        const unit = this.unit;
         const battleStyle = 'agressive';
 
         const allyUnits = TacticalUnitManager.inst().getAllyTeam(this.unit);
@@ -136,28 +136,39 @@ class TacticalBotController extends TacticalUnitController {
         });
 
         const closestUnit = oppositeUnitsByDistance[0];
-        const vulnerablePosition = closestUnit.vulnerablePosition();
 
-        const distanceToClosestUnit = GameUtils.distance(closestUnit.position, unit.position);
+        let distanceToClosestUnit = GameUtils.distance(closestUnit.position, unit.position);
+        let isInRangeToUseSkillToClosestTarget = distanceToClosestUnit >= tbsSkill.range.getMin() && distanceToClosestUnit <= tbsSkill.range.getMax();
+        if (isInRangeToUseSkillToClosestTarget) {
+            let useAction = true;
+            if (tbsSkill.getCritical()) {
+                if (!closestUnit.checkCriticalPosition(this.unit.position.x, this.unit.position.y)) {
+                    useAction = false;
+                }
+            }
+            if (useAction) {
+                await this.checkUseAction(skill, allyUnits, oppositeUnits);
+                return
+            } 
+        }
+        await this.checkMove(skill, closestUnit);
 
-        const isInRangeToUseSkillToClosestTarget = distanceToClosestUnit >= tbsSkill.range.getMin() && distanceToClosestUnit <= tbsSkill.range.getMax();
-
+        distanceToClosestUnit = GameUtils.distance(closestUnit.position, unit.position);
+        isInRangeToUseSkillToClosestTarget = distanceToClosestUnit >= tbsSkill.range.getMin() && distanceToClosestUnit <= tbsSkill.range.getMax();
         if (isInRangeToUseSkillToClosestTarget) {
             // When bot is already in attack range.
-            await this.checkUseAction(tbsSkill, allyUnits, oppositeUnits);
+            await this.checkUseAction(skill, allyUnits, oppositeUnits);
         }
-
-        const moveableTiles = TacticalRangeManager.inst().calculateMovableTiles(this.unit.position.x, this.unit.position.y, this.unit.moveRange());
-        TacticalRangeManager.inst().showMoveTileSprites(this.unit);
     }
     /**
      * checkUseAction
-     * @param {TBS_SkillData} tbsSkill 
+     * @param {rm.types.Skill} skill 
      * @param {TacticalUnit[]} allyUnits 
      * @param {TacticalUnit[]} oppositeUnits 
      * @returns 
      */
-    async checkUseAction(tbsSkill, allyUnits, oppositeUnits) {
+    async checkUseAction(skill, allyUnits, oppositeUnits) {
+        const tbsSkill = skill.tbsSkill;
         const actionPosition = this.calculateBestActionPosition(tbsSkill, allyUnits, oppositeUnits);
         if (!actionPosition) return;
         let actionTileImg = tbsSkill.getTileImage();
@@ -165,15 +176,73 @@ class TacticalBotController extends TacticalUnitController {
         TacticalRangeManager.inst().showActionTileSprites(this.unit, skill.id, showSelection ? "BlackSquare" : actionTileImg);
         TacticalRangeManager.inst().showSelectionTileAtCursor(this.unit, tbsSkill.range);
         await this.wait(BOT_DELAY);
-        cursor.move(actionPosition.x, actionPosition.y);
+        this.cursor.move(actionPosition.x, actionPosition.y);
         await this.wait(BOT_DELAY);
         this.unit.useSkill(skill.id, actionPosition.x, actionPosition.y);
-        TacticalRangeManager.inst().hideTileSprites(cursor);
+        TacticalRangeManager.inst().hideTileSprites(this.cursor);
         TacticalRangeManager.inst().hideTileSprites(this.unit);
     }
+    /**
+     * Check move
+     * @param {rm.types.Skill} skill 
+     * @param {TacticalUnit} closestUnit 
+     */
+    async checkMove(skill, closestUnit) {
+        /** @type {TBS_SkillData} */
+        const tbsSkill = skill.tbsSkill;
 
-    async checkMove() {
+        const moveableTiles = TacticalRangeManager.inst().calculateMovableTiles(this.unit.position.x, this.unit.position.y, this.unit.moveRange());
+        TacticalRangeManager.inst().showMoveTileSprites(this.unit);
+        /** @type {FLOOD_FILL_TILE[]} */
+        let possibleTiles = [];
+        moveableTiles.forEach(tile => {
+            // Move to the tile that you can the bot can use the skill at the closest unit.
+            const distToTarget = GameUtils.distance(closestUnit.position, tile);
+            if (distToTarget >= tbsSkill.range.getMin() && distToTarget <= tbsSkill.range.getMax()) {
+                possibleTiles.push(tile);
+            }
+        })
 
+        if (possibleTiles.length == 0) {
+            // Move to the tile that closest to the closest unit.
+            let minDist = Number.POSITIVE_INFINITY;
+            let targetTile = null;
+            moveableTiles.forEach(tile => {
+                const distToTarget = GameUtils.distance(closestUnit.position, tile);
+                if (distToTarget < minDist) {
+                    minDist = distToTarget;
+                    targetTile = tile;
+                }
+            })
+            possibleTiles.push(targetTile);
+        }
+
+        const criticalTiles = tbsSkill.getCritical() ? possibleTiles.filter((tile) => {
+            return closestUnit.checkCriticalPosition(tile.x, tile.y);
+        }) : [];
+
+        if (criticalTiles.length > 0) {
+            possibleTiles = criticalTiles;
+        }
+
+        possibleTiles = possibleTiles.sort((a, b) => {
+            const distA = GameUtils.distance(a, closestUnit.position);   //Math.abs(this.unit.position.x - a.position.x) + Math.abs(this.unit.position.y - a.position.y);
+            const distB = GameUtils.distance(b, closestUnit.position);   //Math.abs(this.unit.position.x - b.position.x) + Math.abs(this.unit.position.y - b.position.y);
+            return distB - distA;
+        })
+
+        const destinateTile = possibleTiles[0];
+
+        if (destinateTile) {
+            await this.wait(BOT_DELAY);
+            this.cursor.move(destinateTile.x, destinateTile.y);
+            TacticalRangeManager.inst().hideTileSprites(this.unit);
+            return new Promise((resolve, reject) => {
+                this.unit.move(destinateTile.x, destinateTile.y, () => {
+                    resolve();
+                });
+            })
+        }
     }
     /**
      * Wait
