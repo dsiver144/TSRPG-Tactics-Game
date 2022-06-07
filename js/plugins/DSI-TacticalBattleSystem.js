@@ -482,15 +482,28 @@ window.TBS = window.TBS || {};
             this.showPhaseTextSprite("EnemyTurn");
             this.currentPhase = 'updateTurn';
 
+            TacticalUnitManager.inst().enemyUnits.forEach((unit) => {
+                unit.onTurnStart();
+            });
+
             setTimeout(() => {
-                TacticalUnitManager.inst().enemyUnits.forEach(u => u.actionPoints = 0);
+                this.currentEnemyUnit = TacticalUnitManager.inst().enemyUnits[0];
+                this.currentEnemyUnit.controller.onSelect();
             }, 1000);
         }
         /**
          * Update Enemy Turn
          */
         updateEnemyTurn() {
+            if (this.currentEnemyUnit && !this.currentEnemyUnit.isBusy()) {
+                if (this.currentEnemyUnit.actionPoints == 0) {
+                    this.currentEnemyUnit = TacticalUnitManager.inst().enemyUnits.filter(unit => unit.actionPoints > 0)[0];
+                    this.currentEnemyUnit && this.currentEnemyUnit.controller.onSelect();
+                }
+            }
             const isAllPlayerFinished = TacticalUnitManager.inst().enemyUnits.every(unit => !unit.isBusy() && unit.actionPoints == 0);
+            // console.log(this.currentEnemyUnit && this.currentEnemyUnit.isBusy(), isAllPlayerFinished, TacticalUnitManager.inst().enemyUnits.filter(u => u.isBusy()));
+
             if (isAllPlayerFinished) {
                 this.onEnemyTurnEnd();
             }

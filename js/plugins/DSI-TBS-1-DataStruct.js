@@ -49,6 +49,20 @@ class TBS_SkillData {
         return this.targets.map(t => TBS_TARGET_TYPE[t]);
     }
     /**
+     * Set AI Targets
+     * @param {('ally' | 'enemy' | 'user')[]} targets 
+     */
+    setAITargets(targets) {
+        this.aiTargets = targets;
+    }
+    /**
+     * AI Target Types
+     * @returns {TBS_TARGET_TYPE[]}
+     */
+    getAITargets() {
+        return (this.aiTargets || this.targets).map(t => TBS_TARGET_TYPE[t]);
+    }
+    /**
      * Set Sequences
      * @param {string} str 
      */
