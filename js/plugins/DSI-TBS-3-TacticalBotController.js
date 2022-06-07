@@ -186,7 +186,6 @@ class TacticalBotController extends TacticalUnitController {
         const actionTiles = TacticalRangeManager.inst().calculateActionTiles(unitX, unitY, range);
         /** @type {TBS_PossibleActionPosition[]} */
         const result = [];
-        console.log({actionTiles});
         if (range.isSelectable()) {
             for (let tile of actionTiles) {
                 const targetPositions = TacticalRangeManager.inst().calculateSelectionTiles(this.unit, tile.x, tile.y, range);
@@ -210,13 +209,13 @@ class TacticalBotController extends TacticalUnitController {
         const positions = this.calculateAllPossibleActionPosition(tbsSkill);
         /** @type {TacticalUnit[]} */
         let targets = [];
-        if (tbsSkill.getTargets().includes(TBS_TARGET_TYPE.ally)) {
+        if (tbsSkill.getAITargets().includes(TBS_TARGET_TYPE.ally)) {
             targets = targets.concat(allyUnits);
         }
-        if (tbsSkill.getTargets().includes(TBS_TARGET_TYPE.enemy)) {
+        if (tbsSkill.getAITargets().includes(TBS_TARGET_TYPE.enemy)) {
             targets = targets.concat(oppositeUnits);
         }
-        if (tbsSkill.getTargets().includes(TBS_TARGET_TYPE.user)) {
+        if (tbsSkill.getAITargets().includes(TBS_TARGET_TYPE.user)) {
             targets.push(this.unit);
         }
         const targetMap = new TBS_UnitMap();
