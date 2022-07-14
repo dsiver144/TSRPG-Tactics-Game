@@ -257,8 +257,10 @@ class TacticalSequenceApplyBattleAction extends TacticalSequenceAction {
      */
     onStart() {
         super.onStart();
+        const beforeHP = this.target.hp;
         this.battleAction.apply(this.target);
-        console.log("> Appled Action to Target: ", this.target.result());
+        const afterHP = this.target.hp;
+        console.log("> Appled Action to Target: ", this.target.result(), beforeHP, afterHP);
         this.processActionResult();
     }
     /**

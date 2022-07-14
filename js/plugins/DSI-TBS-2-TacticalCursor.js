@@ -88,7 +88,6 @@ class TacticalCursor {
         if (this.onPositionChangedCallback) {
             this.onPositionChangedCallback(x, y);
         }
-        console.log("CUSOR POSITION", this.position);
     }
     /**
      * Screen X

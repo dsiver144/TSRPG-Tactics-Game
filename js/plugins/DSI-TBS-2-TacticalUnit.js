@@ -359,10 +359,18 @@ class TacticalUnit {
      * On Action End.
      */
     onActionEnd() {
+        this.clearBattlerInfo();
         this.consumeActionPoints(1);
         if (this.hasActed()) {
             this.onTurnEnd();
         }
+    }
+    /**
+     * Clear battler info
+     */
+    clearBattlerInfo() {
+        this.battler.clearActions();
+        this.battler.clearResult();
     }
     /**
      * Consume action points
@@ -492,6 +500,20 @@ class TacticalUnit {
     getCharacter() {
         return this.battlerSprite ? this.battlerSprite._character : null;
     }
+    /**
+     * Unit Name
+     * @returns {string}
+     */
+    name() {
+       return this.battler.name();
+    }
+    /**
+     * Unit Level
+     * @returns {number}
+     */
+    level() {
+        return 0;
+    }
 }
 
 class Tactical_EnemyUnit extends TacticalUnit {
@@ -577,5 +599,13 @@ class Tactical_AllyUnit extends TacticalUnit {
      */
      attackSkillId() {
         return this.battler.weapons()[0].tbsWeapon.skillId;
+    }
+    /**
+     * Unit Level
+     */
+    level() {
+        /** @type {Game_Actor} */
+        const actor = this.battler;
+        return actor.level;
     }
 }

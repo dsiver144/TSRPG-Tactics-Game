@@ -105,6 +105,11 @@ window.TBS = window.TBS || {};
             this.actorUnitCommandWindow.deactivate();
             GameUtils.addWindow(this.actorUnitCommandWindow);
 
+            this.unitInfoWindow = new Window_TacticalUnitInfo();
+            this.unitInfoWindow.visible = false;
+            this.unitInfoWindow.deactivate();
+            GameUtils.addWindow(this.unitInfoWindow);
+
             this.spritePhaseText = new Sprite();
             this.spritePhaseText.anchor.x = 0.5;
             this.spritePhaseText.anchor.y = 0.5;
@@ -426,6 +431,8 @@ window.TBS = window.TBS || {};
             this.cursor.activate();
             this.cursor.clearAllCallbacks();
             this.cursor.setOnOKCallback(this.cursorOnPlayerTurnCallback.bind(this));
+            this.cursor.setOnPositionChangedCallback(this.cursorPositionChangedCallbackOnPlayerTurn.bind(this), false);
+            this.cursorPositionChangedCallbackOnPlayerTurn(this.cursor.position.x, this.cursor.position.y);
         }
         /**
          * Cursor on player turn.
@@ -444,6 +451,23 @@ window.TBS = window.TBS || {};
                 // TacticalRangeManager.inst().showMoveTileSprites(selectedUnit);
                 selectedUnit.controller.onSelect();
             }
+        }
+        /**
+         * Cursor move callback on player turn
+         * @param {number} direction 
+         * @param {number} x 
+         * @param {number} y 
+         */
+        cursorPositionChangedCallbackOnPlayerTurn(x, y) {
+            const selectedUnit = TacticalUnitManager.inst().getUnitAt(x, y);
+            if (!selectedUnit) {
+                this.unitInfoWindow.deactivate();
+                this.unitInfoWindow.visible = false;
+                return;
+            }
+            this.unitInfoWindow.activate();
+            this.unitInfoWindow.visible = true;
+            this.unitInfoWindow.setUnit(selectedUnit);
         }
         /**
          * On Actor Unit Command Cancel.
