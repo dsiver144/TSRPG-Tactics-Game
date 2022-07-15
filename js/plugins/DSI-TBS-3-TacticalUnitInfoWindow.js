@@ -29,9 +29,9 @@ class Window_TacticalUnitInfo extends Window_Base {
     }
     /**
      * Draw Page 0
-     * @param {Game_Battler} previewBattler
+     * @param {Game_Battler} testBattler
      */
-    drawPage0(previewBattler = null) {
+    drawPage0(testBattler = null) {
         this.contents.clear();
         const unit = this.unit;
         const offset = 4;
@@ -48,10 +48,10 @@ class Window_TacticalUnitInfo extends Window_Base {
         const battler = unit.battler;
         dy += lh * 2;
         const colWidth = cw / 3;
-        const previewHP = previewBattler ? previewBattler.hp : null;
+        const previewHP = testBattler ? testBattler.hp : null;
         this.drawGauge('HP', battler.hp, battler.mhp, battler.hpRate(), dx, dy, colWidth, "#eba315", "#eb1543", previewHP);
         dy += lh;
-        const previewMP = previewBattler ? previewBattler.mp : null;
+        const previewMP = testBattler ? testBattler.mp : null;
         this.drawGauge('MP', battler.mp, battler.mmp, battler.mpRate(), dx, dy, colWidth, "#429eff", "#82daff", previewMP);
     }
     /**
@@ -115,11 +115,11 @@ class Window_TacticalUnitInfo extends Window_Base {
         action.setSubject(this.unit.battler);
         action.setAttack();
         /** @type {Game_Battler} */
-        const fakeBattler = JsonEx.makeDeepCopy(this.unit.battler);
-        action.apply(fakeBattler);
-        const result = fakeBattler.result();
-        if (result.hpDamage > 0) {
-            this.drawPage0(fakeBattler);
+        const testBattler = JsonEx.makeDeepCopy(this.unit.battler);
+        action.apply(testBattler);
+        const result = testBattler.result();
+        if (result.hpDamage > 0 || result.mpDamage > 0) {
+            this.drawPage0(testBattler);
         }
     }
 
